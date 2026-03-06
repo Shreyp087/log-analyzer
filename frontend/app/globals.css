@@ -65,6 +65,10 @@ h1 {
   font-size: 1rem;
 }
 
+.hero-actions {
+  margin-top: 0.95rem;
+}
+
 .grid {
   display: grid;
   gap: 1rem;
@@ -131,6 +135,102 @@ code {
   font-weight: 700;
 }
 
+.btn-secondary {
+  display: inline-block;
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 34, 47, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-family: var(--font-mono), "Consolas", monospace;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  width: min(520px, 100%);
+  background: var(--card);
+  border: 1px solid #ffffff;
+  border-radius: 16px;
+  padding: 1.15rem;
+  box-shadow: 0 10px 24px var(--shadow);
+}
+
+.auth-form {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.field span {
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.input {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 34, 47, 0.14);
+  padding: 0 0.65rem;
+  font-family: var(--font-mono), "Consolas", monospace;
+}
+
+.btn-primary {
+  margin-top: 0.2rem;
+  height: 42px;
+  border-radius: 10px;
+  border: 0;
+  background: linear-gradient(125deg, #1a7a61, #2b8f74);
+  color: #fff;
+  font-family: var(--font-mono), "Consolas", monospace;
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.form-feedback {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+}
+
+.form-feedback.error {
+  color: #952f2f;
+}
+
+.form-feedback.success {
+  color: var(--ok);
+}
+
+.auth-footer {
+  margin-top: 0.85rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.auth-footer a {
+  color: var(--ink);
+  font-weight: 700;
+}
+
 @media (max-width: 560px) {
   .shell {
     padding: 1.4rem 0.75rem 2.2rem;
@@ -139,5 +239,9 @@ code {
   .stage-row {
     grid-template-columns: 58px 82px 1fr;
     font-size: 0.78rem;
+  }
+
+  .auth-card {
+    padding: 0.95rem;
   }
 }
