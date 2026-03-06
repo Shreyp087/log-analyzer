@@ -832,3 +832,61 @@ Rationale:
 
 Result:
 - Auth journey is now fully navigable for first-time users.
+
+## Phase 12: Final Polish
+
+Date: 2026-03-06
+
+## Decision 42: Add dedicated suspicious Zscaler demo log for anomaly showcase
+
+Context:
+- Final demo quality depends on deterministic, visible anomaly output from a single upload.
+
+Selected approach:
+- Added `sample_logs/suspicious_zscaler.log` with parser-compatible rows intentionally covering blocked, suspicious destination, zero-byte allowed, and excessive-transfer scenarios.
+
+Alternatives:
+1. Use existing CSV samples as demo input.
+   - Trade-off: Less file creation effort, but parser mismatch and conversion overhead reduce walkthrough clarity.
+
+Rationale:
+- Parser-native log format keeps demo flow clean and reproducible.
+
+Result:
+- One sample file now produces richer anomaly evidence for frontend analysis view.
+
+## Decision 43: Finalize README as a complete handoff artifact
+
+Context:
+- Earlier README was phase-oriented; final stage requires interview-ready and onboarding-ready documentation.
+
+Selected approach:
+- Rewrote README to include setup, architecture, API endpoints, anomaly logic, AI usage, sample credentials, and sample log notes.
+
+Alternatives:
+1. Keep high-level README and defer details to code/docs folder.
+   - Trade-off: Lower documentation maintenance, but weaker first-read comprehension for reviewers.
+
+Rationale:
+- A complete README reduces friction for evaluators and improves project communication quality.
+
+Result:
+- Top-level repository documentation is now complete and actionable.
+
+## Decision 44: Add explicit demo walkthrough script
+
+Context:
+- Video/demo delivery quality can vary without prepared structure.
+
+Selected approach:
+- Added `docs/demo-script.md` with ordered talking points from environment setup through anomaly explanation and architectural trade-offs.
+
+Alternatives:
+1. Present demo without a script.
+   - Trade-off: Flexible delivery, but higher risk of omitting key technical decisions.
+
+Rationale:
+- Structured script improves consistency and interview confidence under time constraints.
+
+Result:
+- Demonstration flow is standardized and repeatable.

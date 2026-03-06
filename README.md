@@ -2,110 +2,201 @@
 
 ## Project Overview
 
-Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
+Log Analyzer is a full-stack cybersecurity take-home project that ingests Zscaler-style logs, stores normalized events, detects anomalies, and renders analyst-facing summaries and findings.
 
-Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, Stage 4 minimum working API routes, Stage 5 parsing layer services, Stage 6 upload + summary flow, Stage 7 anomaly detection, Stage 8 frontend shell, Stage 9 frontend auth layer, Stage 10 upload UI workflow, and Stage 11 analysis display.
+Current implementation includes:
+- Authenticated workflow (register/login -> upload -> analysis)
+- PostgreSQL persistence for users, uploads, events, anomalies, and summaries
+- Rule-based anomaly detection with confidence/severity
+- Next.js dashboard, upload UI, and analysis display
 
 ## Chosen Stack
 
-- Frontend: Next.js (TypeScript, App Router)
-- Backend API and services: Python
-- Database: PostgreSQL (Docker Compose for local consistency)
-- Data source format: line-based log files in `sample_logs/`
+- Frontend: Next.js 14 (TypeScript, App Router)
+- Backend: Flask + Flask-SQLAlchemy + Flask-Migrate + Flask-JWT-Extended
+- Database: PostgreSQL 16 (Docker Compose)
+- Local file storage: `backend/uploads`
 
-## Architecture Summary
+## Architecture
 
-- Ingestion layer: reads raw log lines from sample or uploaded files.
-- Parsing layer: normalizes log lines into structured records.
-- Detection layer: applies anomaly rules over normalized records.
-- Summary layer: produces aggregates and human-readable findings.
-- Persistence layer: stores processed records and metadata in PostgreSQL.
+1. **Frontend UI**
+- `/register` and `/login` for authentication
+- `/dashboard` as authenticated home
+- `/upload` for log ingestion
+- `/analysis/[id]` for summary + timeline + anomalies + findings
 
-## Setup (Placeholder)
+2. **API Layer**
+- Auth routes for register/login/current-user
+- Upload route for file ingestion and analysis pipeline execution
 
-### Local Development Setup
+3. **Processing Layer**
+- Parser normalizes raw Zscaler lines into structured event fields
+- Summary service computes aggregate metrics
+- Anomaly service applies deterministic security rules
 
-TBD in Phase 2.
+4. **Persistence Layer**
+- PostgreSQL stores all core entities
+- Raw uploaded files are saved to local upload directory
 
-### Environment Configuration
+## Setup
 
-TBD in Phase 2.
+### Prerequisites
 
-### Backend Setup
+- Docker Desktop (or Docker Engine)
+- Python 3.11+ with `venv`
+- Node.js 18+ and npm
 
-1. Copy env template:
-   - `cd backend`
-   - `cp .env.example .env` (Linux/macOS)
-   - `Copy-Item .env.example .env` (PowerShell)
-2. Install dependencies:
-   - `pip install -r requirements.txt`
-3. Run migrations:
-   - `python -m flask --app run.py db upgrade`
-4. Start app:
-   - `python run.py`
-5. Verify core routes:
-   - `GET /health`
-   - `POST /auth/register`
-   - `POST /auth/login`
-   - `GET /auth/me` (Bearer token)
-   - `POST /uploads` (Bearer token + multipart file)
-6. Parser modules:
-   - `backend/app/services/parser.py`
-   - `backend/app/services/normalizer.py`
-7. Upload/summary modules:
-   - `backend/app/routes/uploads.py`
-   - `backend/app/services/storage.py`
-   - `backend/app/services/summary.py`
-8. Anomaly modules:
-   - `backend/app/services/anomaly.py`
-   - `backend/app/services/scoring.py`
-9. Frontend auth modules:
-   - `frontend/lib/api.ts`
-   - `frontend/lib/auth.ts`
-   - `frontend/types/index.ts`
-   - `frontend/components/LoginForm.tsx`
-   - `frontend/components/RegisterForm.tsx`
-   - `frontend/app/login/page.tsx`
-   - `frontend/app/register/page.tsx`
-10. Frontend upload modules:
-    - `frontend/app/dashboard/page.tsx`
-    - `frontend/app/upload/page.tsx`
-    - `frontend/components/UploadDropzone.tsx`
-11. Frontend analysis modules:
-    - `frontend/app/analysis/[id]/page.tsx`
-    - `frontend/components/SummaryCards.tsx`
-    - `frontend/components/TimelineTable.tsx`
-    - `frontend/components/AnomaliesTable.tsx`
-    - `frontend/components/FindingsPanel.tsx`
+### 1. Start PostgreSQL
 
-### Frontend Setup
+From repository root:
 
-1. Move into frontend:
-   - `cd frontend`
-2. Install dependencies:
-   - `npm install`
-3. Start dev server:
-   - `npm run dev`
-4. Open:
-   - `http://localhost:3000`
+```powershell
+docker compose up -d postgres
+```
+
+### 2. Configure and Run Backend
+
+```powershell
+cd backend
+Copy-Item .env.example .env
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m flask --app run.py db upgrade
+python run.py
+```
+
+Backend base URL: `http://localhost:8000`  
+Health check: `GET http://localhost:8000/health`
+
+### 3. Configure and Run Frontend
+
+In a separate terminal:
+
+```powershell
+cd frontend
+npm install
+@"
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+"@ | Set-Content .env.local
+npm run dev
+```
+
+Frontend URL: `http://localhost:3000`
+
+## API Endpoints
+
+### Health
+
+- `GET /health`  
+Returns service readiness.
+
+### Auth
+
+- `POST /auth/register`  
+Body: `{ "email": "user@example.com", "password": "StrongPass123" }`
+
+- `POST /auth/login`  
+Body: `{ "email": "user@example.com", "password": "StrongPass123" }`
+
+- `GET /auth/me`  
+Requires Bearer JWT token.
+
+### Upload + Analysis
+
+- `POST /uploads`  
+Requires Bearer JWT token and multipart form data:
+  - `file` (log file)
+  - `source` (currently `zscaler`)
+
+Returns:
+- upload metadata
+- parse error preview
+- summary metrics
+- anomaly list
+- `events_preview` for timeline display
+
+## Anomaly Explanation
+
+Anomaly detection is currently rule-based (`backend/app/services/anomaly.py`):
+
+1. `blocked_request`
+- Trigger: action is `BLOCK`
+
+2. `suspicious_destination`
+- Trigger: destination contains threat keywords  
+Keywords: `malicious`, `phish`, `command-and-control`, `cnc`, `tor`, `darkweb`
+
+3. `zero_byte_allowed_request`
+- Trigger: action is `ALLOW` or `PERMIT` and bytes transferred is `0`
+
+4. `excessive_data_transfer`
+- Trigger: bytes transferred >= `50,000,000`
+
+Each anomaly includes:
+- `anomaly_type`
+- `description`
+- `confidence` (0-1)
+- `severity` derived from confidence
+
+## Where AI Is Used
+
+Current runtime behavior in this repo is deterministic and does **not** require an external LLM call to function.
+
+AI is used in this project in two ways:
+
+1. Development acceleration
+- Assisted scaffold/code generation and documentation drafting.
+
+2. Extension point (future)
+- The summary/findings layer can be upgraded with LLM-generated narrative explanations, but this is not mandatory for current execution.
+
+## Sample Credentials
+
+There is no seeded default user. Create one at `/register`.
+
+For demo purposes, you can use:
+- Email: `analyst.demo@company.com`
+- Password: `StrongPass123`
+
+If this user already exists in your local DB, use `/login` with the same credentials.
+
+## Sample Log Details
+
+### 1. Baseline sample
+- File: `sample_logs/sample_zscaler.log`
+- Purpose: clean, small dataset for parser sanity checks.
+
+### 2. Suspicious demo sample
+- File: `sample_logs/suspicious_zscaler.log`
+- Purpose: concentrated anomaly triggers for demo walkthrough.
+- Contains examples of:
+  - blocked suspicious destinations
+  - zero-byte allowed requests
+  - high-volume transfers
+  - threat-keyword destination matches
+
+### 3. Legacy CSV samples
+- `sample_logs/normal_traffic.csv`
+- `sample_logs/suspicious_traffic.csv`
 
 ## Build Checklist
 
-- [x] Stage 1: README foundation skeleton
-- [x] Stage 1: PostgreSQL-only `docker-compose.yml`
-- [x] Stage 1: canonical sample log (`sample_logs/sample_zscaler.log`)
-- [x] Stage 2: backend shell (`run.py`, app factory, config, env template)
-- [x] Stage 3: data model + initial migrations
-- [x] Stage 4: minimum working API (`health`, `auth`)
-- [x] Stage 5: parser implementation against sample logs
-- [x] Stage 6: upload and summary flow
-- [x] Stage 7: anomaly detection module
+- [x] Stage 1: foundation and canonical sample
+- [x] Stage 2: backend shell
+- [x] Stage 3: data model + migrations
+- [x] Stage 4: minimum API (health + auth)
+- [x] Stage 5: parser + normalizer
+- [x] Stage 6: upload + summary flow
+- [x] Stage 7: anomaly detection
 - [x] Stage 8: frontend shell
-- [x] Stage 9: frontend auth layer
-- [x] Stage 10: upload UI workflow
-- [x] Stage 11: analysis display workflow
+- [x] Stage 9: frontend auth
+- [x] Stage 10: frontend upload flow
+- [x] Stage 11: analysis display
+- [x] Stage 12: final polish and demo docs
 
-## Documentation Workflow
+## Documentation
 
-- [docs/Workflow.md](docs/Workflow.md): execution steps and rationale format
-- [docs/Decision_Log.md](docs/Decision_Log.md): alternatives, trade-offs, and decisions
+- [docs/Workflow.md](docs/Workflow.md)
+- [docs/Decision_Log.md](docs/Decision_Log.md)
+- [docs/demo-script.md](docs/demo-script.md)

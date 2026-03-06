@@ -1177,6 +1177,90 @@ Validation:
 Outcome:
 - Auth journey is now complete: Home -> Register/Login -> Dashboard.
 
+## Phase 12: Final Polish
+
+Date: 2026-03-06
+
+### Task 40: Add stronger anomaly demo sample (`sample_logs/suspicious_zscaler.log`)
+
+Objective:
+- Provide a high-signal demo log that reliably triggers multiple anomaly categories.
+
+Approach chosen:
+- Added `sample_logs/suspicious_zscaler.log` with concentrated cases for:
+  - blocked requests
+  - suspicious destination keywords
+  - zero-byte allowed/permitted traffic
+  - excessive transfer volume
+
+Alternative considered:
+1. Reuse existing CSV samples for Stage 12 demo.
+
+Trade-off:
+- Reuse is faster, but current parser targets line-based Zscaler format and would require conversion/mapping overhead for clean walkthroughs.
+
+Why this choice:
+- A parser-native `.log` sample gives predictable output and reduces demo ambiguity.
+
+Validation:
+- Confirmed file format matches parser expectations and includes intended anomaly triggers.
+
+Outcome:
+- Demo can now showcase anomaly behavior consistently in one upload.
+
+### Task 41: Finalize README with implementation-ready details
+
+Objective:
+- Convert README from staged skeleton to a final handoff-quality project document.
+
+Approach chosen:
+- Reworked `README.md` with:
+  - full setup instructions
+  - architecture summary
+  - API endpoint reference
+  - anomaly rule explanation
+  - AI usage clarification
+  - sample credential guidance
+  - sample log behavior details
+
+Alternative considered:
+1. Keep minimal README and rely on code walk-through for details.
+
+Trade-off:
+- Minimal docs are faster to maintain, but weaker for onboarding, review, and interview context.
+
+Why this choice:
+- Final README should stand alone for evaluators and collaborators without requiring source deep-dives first.
+
+Validation:
+- Checked section coverage against Stage 12 checklist requirements.
+
+Outcome:
+- Repository now has a complete top-level technical brief.
+
+### Task 42: Add walkthrough talking points (`docs/demo-script.md`)
+
+Objective:
+- Provide a structured demo narrative for video/interview walkthroughs.
+
+Approach chosen:
+- Added `docs/demo-script.md` covering intro, setup, auth flow, upload flow, anomaly explanation, architecture trade-offs, and close.
+
+Alternative considered:
+1. Keep demo narrative undocumented and present ad hoc.
+
+Trade-off:
+- Ad hoc demos can feel natural, but increase risk of missing critical technical points under time pressure.
+
+Why this choice:
+- Scripted structure improves consistency and highlights the strongest architecture decisions.
+
+Validation:
+- Confirmed script aligns with current implemented routes/screens and Stage 12 scope.
+
+Outcome:
+- Demo delivery is now repeatable and interview-ready.
+
 ## Step Template (For Next Phases)
 
 ```md
