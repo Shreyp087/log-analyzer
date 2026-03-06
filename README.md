@@ -64,7 +64,9 @@ TBD in Phase 2.
    - `frontend/lib/auth.ts`
    - `frontend/types/index.ts`
    - `frontend/components/LoginForm.tsx`
+   - `frontend/components/RegisterForm.tsx`
    - `frontend/app/login/page.tsx`
+   - `frontend/app/register/page.tsx`
 10. Frontend upload modules:
     - `frontend/app/dashboard/page.tsx`
     - `frontend/app/upload/page.tsx`

@@ -38,6 +38,9 @@ export default function HomePage() {
           <Link href="/login" className="btn-secondary">
             Open Login Flow
           </Link>
+          <Link href="/register" className="btn-secondary">
+            Open Register Flow
+          </Link>
           <Link href="/dashboard" className="btn-secondary">
             Open Dashboard
           </Link>

@@ -2,6 +2,7 @@ import os
 from typing import Optional
 
 from flask import Flask
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -17,6 +18,11 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     app = Flask(__name__)
     env_name = config_name or os.getenv("FLASK_ENV", "development")
     app.config.from_object(get_config(env_name))
+    CORS(
+        app,
+        resources={r"/*": {"origins": app.config.get("CORS_ORIGINS", [])}},
+        supports_credentials=False,
+    )
 
     db.init_app(app)
     jwt.init_app(app)
