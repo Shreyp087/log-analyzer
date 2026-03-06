@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
 
 class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me-at-least-32")
@@ -15,6 +17,8 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
     APP_PORT = int(os.getenv("APP_PORT", "8000"))
+    UPLOAD_DIR = os.getenv("UPLOAD_DIR", os.path.join(BACKEND_ROOT, "uploads"))
+    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(20 * 1024 * 1024)))
 
 
 class DevelopmentConfig(BaseConfig):

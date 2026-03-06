@@ -23,6 +23,7 @@ class Upload(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     filename = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(500), nullable=True)
     source = db.Column(db.String(100), nullable=False, default="zscaler")
     status = db.Column(db.String(50), nullable=False, default="uploaded")
     uploaded_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -98,6 +99,10 @@ class Summary(db.Model):
     total_anomalies = db.Column(db.Integer, nullable=False, default=0)
     allowed_count = db.Column(db.Integer, nullable=False, default=0)
     blocked_count = db.Column(db.Integer, nullable=False, default=0)
+    unique_source_ips = db.Column(db.Integer, nullable=False, default=0)
+    top_categories = db.Column(db.JSON, nullable=False, default=list)
+    top_destinations = db.Column(db.JSON, nullable=False, default=list)
+    top_source_ips = db.Column(db.JSON, nullable=False, default=list)
     generated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     upload = db.relationship("Upload", back_populates="summary")
