@@ -1,0 +1,4 @@
+timestamp,source_ip,destination_ip,method,path,status,response_ms
+2026-03-06T09:10:00Z,10.0.1.12,172.16.0.20,GET,/api/health,200,22
+2026-03-06T09:10:03Z,10.0.1.15,172.16.0.20,GET,/api/reports,200,118
+2026-03-06T09:10:08Z,10.0.1.22,172.16.0.20,POST,/api/login,200,305

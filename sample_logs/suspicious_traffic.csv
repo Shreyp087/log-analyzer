@@ -1,0 +1,4 @@
+timestamp,source_ip,destination_ip,method,path,status,response_ms
+2026-03-06T10:12:11Z,45.33.12.9,172.16.0.20,POST,/api/login,401,812
+2026-03-06T10:12:15Z,201.54.2.99,172.16.0.20,GET,/admin,403,640
+2026-03-06T10:12:19Z,45.33.12.9,172.16.0.20,GET,/api/users,500,1290
