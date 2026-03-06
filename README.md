@@ -4,7 +4,7 @@
 
 Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
 
-Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, and Stage 4 minimum working API routes.
+Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, Stage 4 minimum working API routes, and Stage 5 parsing layer services.
 
 ## Chosen Stack
 
@@ -48,6 +48,9 @@ TBD in Phase 2.
    - `POST /auth/register`
    - `POST /auth/login`
    - `GET /auth/me` (Bearer token)
+6. Parser modules:
+   - `backend/app/services/parser.py`
+   - `backend/app/services/normalizer.py`
 
 ### Frontend Setup
 
@@ -61,7 +64,7 @@ TBD in Phase 2.
 - [x] Stage 2: backend shell (`run.py`, app factory, config, env template)
 - [x] Stage 3: data model + initial migrations
 - [x] Stage 4: minimum working API (`health`, `auth`)
-- [ ] Stage 5: parser implementation against sample logs
+- [x] Stage 5: parser implementation against sample logs
 - [ ] Stage 6: anomaly detection module
 - [ ] Stage 7: summarization pipeline
 - [ ] Stage 8: API/frontend integration

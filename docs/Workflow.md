@@ -355,6 +355,68 @@ Validation:
 Outcome:
 - Password handling is encapsulated and ready for future security hardening.
 
+## Phase 5: Parsing Layer
+
+Date: 2026-03-06
+
+### Step 14: Add Zscaler parser service in `backend/app/services/parser.py`
+
+Objective:
+- Convert raw Zscaler log lines into normalized fields aligned to the `Event` model contract.
+
+Approach chosen:
+- Added parser functions:
+  - `parse_zscaler_line(raw_line)` for one-row parsing
+  - `parse_zscaler_lines(lines)` for batch parsing with structured error collection
+- Parser behavior:
+  - ignores comments/blank lines
+  - validates row shape
+  - normalizes keys to `event_time`, `username`, `source_ip`, `destination`, `action`, `category`, `bytes_transferred`, and `raw_line`
+  - raises/records explicit parse errors for invalid timestamp, invalid byte value, or malformed row
+
+Alternative considered:
+1. Put parsing directly inside upload route handlers.
+
+Trade-off:
+- Faster initial endpoint coding, but route bloat, weaker testability, and harder architecture explanation.
+
+Why this choice:
+- Service-layer parsing keeps API routes thin and gives reusable analysis primitives.
+
+Validation:
+- Parsed `sample_logs/sample_zscaler.log` with output `events=4`, `errors=0`.
+- Verified invalid row handling returns structured parse errors with line numbers.
+
+Outcome:
+- Reusable parser layer now provides normalized event payloads for ingestion pipelines.
+
+### Step 15: Add normalization helpers in `backend/app/services/normalizer.py`
+
+Objective:
+- Centralize low-level conversion/cleanup logic used by the parser.
+
+Approach chosen:
+- Added helper functions for:
+  - timestamp parsing (`parse_timestamp`)
+  - integer conversion (`parse_int`)
+  - null/empty handling (`clean_text`)
+  - action cleanup (`normalize_action`)
+
+Alternative considered:
+1. Keep conversion code inline in parser functions.
+
+Trade-off:
+- Fewer files now, but duplicated conversion logic and harder future reuse.
+
+Why this choice:
+- Normalizer helpers isolate data hygiene concerns and keep parser flow readable.
+
+Validation:
+- Verified helpers are used by parser and produce expected normalized output on sample data.
+
+Outcome:
+- Parser internals are cleaner and easier to extend for additional log formats.
+
 ## Step Template (For Next Phases)
 
 ```md

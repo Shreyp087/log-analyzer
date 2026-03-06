@@ -282,3 +282,48 @@ Rationale:
 
 Result:
 - Credential handling is consistent and reusable.
+
+## Phase 5: Parsing Layer
+
+Date: 2026-03-06
+
+## Decision 15: Implement parser in service layer, not route layer
+
+Context:
+- Stage 5 needed real analysis value by converting raw Zscaler rows to normalized event fields.
+
+Selected approach:
+- Added `backend/app/services/parser.py` with single-row and batch parse functions.
+- Parser outputs normalized event keys and structured parse errors for malformed input.
+
+Alternatives:
+1. Put parsing directly in upload route logic.
+   - Trade-off: Faster initial delivery, but quickly becomes messy and harder to explain or test.
+
+Rationale:
+- Service-layer parsing preserves route simplicity and creates reusable core analysis logic.
+
+Result:
+- Parsing capability now exists independently of API endpoint implementation.
+
+## Decision 16: Extract normalization helpers into dedicated module
+
+Context:
+- Parser requires repeated cleanup and conversion operations.
+
+Selected approach:
+- Added `backend/app/services/normalizer.py` for:
+  - timestamp parsing
+  - integer conversion
+  - null handling
+  - text/action cleanup
+
+Alternatives:
+1. Keep conversion logic inline in parser methods.
+   - Trade-off: Less initial structure, but duplicated logic and harder maintenance.
+
+Rationale:
+- Dedicated normalizers improve readability and reduce conversion bugs across parsing flows.
+
+Result:
+- Parsing code is cleaner and easier to evolve for additional log sources.
