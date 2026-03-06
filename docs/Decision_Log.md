@@ -515,3 +515,84 @@ Rationale:
 
 Result:
 - Frontend page now communicates backend readiness and next integration targets.
+
+## Phase 9: Frontend Auth Layer
+
+Date: 2026-03-06
+
+## Decision 26: Implement login/auth flow before upload UI
+
+Context:
+- Stage 9 required authenticated frontend flow as a core assignment capability.
+
+Selected approach:
+- Built frontend auth layer first:
+  - API wrapper
+  - auth storage helper
+  - shared types
+  - `/login` page
+  - reusable login form component
+
+Alternatives:
+1. Build upload UI first.
+   - Trade-off: Faster visible feature progress, but unresolved auth flow leads to integration rework.
+
+Rationale:
+- Protected workflow is foundational and should be validated before upload interactions.
+
+Result:
+- Frontend now has a stable authentication baseline for protected feature expansion.
+
+## Decision 27: Use centralized `api.ts` fetch wrapper
+
+Context:
+- Multiple frontend modules will call backend endpoints with consistent error/auth behavior.
+
+Selected approach:
+- Added typed `apiRequest()` wrapper and endpoint helpers for login/register/me.
+
+Alternatives:
+1. Use direct `fetch` in each component.
+   - Trade-off: Less abstraction initially, but duplicated error handling and request setup.
+
+Rationale:
+- Central request utility reduces duplication and enforces contract consistency.
+
+Result:
+- API interaction logic is reusable and predictable.
+
+## Decision 28: Persist auth session in `lib/auth.ts`
+
+Context:
+- Login state should survive refresh/navigation and remain easy to clear on failure/logout.
+
+Selected approach:
+- Implemented localStorage-based session helpers.
+
+Alternatives:
+1. Keep token in component state only.
+   - Trade-off: Simpler per component, but no persistence and fragile UX.
+
+Rationale:
+- Session helper layer is practical for current frontend scope and easy to replace later if needed.
+
+Result:
+- Frontend auth state management is centralized and persistent.
+
+## Decision 29: Keep login form as reusable component
+
+Context:
+- Login UI/logic should remain composable for future pages (e.g., modal, admin login, onboarding).
+
+Selected approach:
+- Added `components/LoginForm.tsx` and kept page-level composition in `app/login/page.tsx`.
+
+Alternatives:
+1. Implement form directly inside page.
+   - Trade-off: Faster initial page setup, but reduced reusability and larger page file complexity.
+
+Rationale:
+- Component separation improves maintainability and future reuse.
+
+Result:
+- Login flow is modular and easier to evolve.

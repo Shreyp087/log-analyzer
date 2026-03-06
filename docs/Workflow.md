@@ -732,6 +732,147 @@ Validation:
 Outcome:
 - Frontend shell is visually coherent and mobile-safe for early integration.
 
+## Phase 9: Frontend Auth Layer
+
+Date: 2026-03-06
+
+### Step 27: Add API wrappers in `frontend/lib/api.ts`
+
+Objective:
+- Standardize API calls and error handling before UI feature wiring.
+
+Approach chosen:
+- Added `apiRequest()` wrapper with:
+  - base URL resolution
+  - auth header injection
+  - JSON serialization/parsing
+  - typed error (`ApiRequestError`)
+- Added auth-oriented request helpers:
+  - `loginUser`
+  - `registerUser`
+  - `fetchCurrentUser`
+
+Alternative considered:
+1. Use raw `fetch` directly inside pages/components.
+
+Trade-off:
+- Faster in short-term, but repeated boilerplate and inconsistent error handling.
+
+Why this choice:
+- Centralized API wrapper keeps frontend auth flow clean and testable.
+
+Validation:
+- Verified login form integration uses wrapper and typed error handling.
+
+Outcome:
+- Frontend has consistent request primitives for protected workflows.
+
+### Step 28: Add token/session helpers in `frontend/lib/auth.ts`
+
+Objective:
+- Encapsulate browser-side auth persistence.
+
+Approach chosen:
+- Added localStorage-backed helpers:
+  - `setAuthSession`
+  - `getAuthSession`
+  - `getAuthToken`
+  - `clearAuthSession`
+  - `hasAuthSession`
+
+Alternative considered:
+1. Store tokens directly in component state only.
+
+Trade-off:
+- Simpler flow per page, but no persistence across refresh/navigation.
+
+Why this choice:
+- Session helper layer keeps auth state management reusable and explicit.
+
+Validation:
+- Confirmed login flow writes/clears auth session through utility functions.
+
+Outcome:
+- Token persistence is centralized for upcoming authenticated UI features.
+
+### Step 29: Add shared frontend types in `frontend/types/index.ts`
+
+Objective:
+- Establish typed contracts for API/auth payloads.
+
+Approach chosen:
+- Added shared interfaces for:
+  - auth session
+  - login/register requests and responses
+  - authenticated user
+  - API error payload
+
+Alternative considered:
+1. Infer shapes ad hoc in each component.
+
+Trade-off:
+- Less upfront typing, but weaker maintainability and easier contract drift.
+
+Why this choice:
+- Shared type definitions improve contract consistency across UI modules.
+
+Validation:
+- Verified API wrappers and login form consume shared type interfaces.
+
+Outcome:
+- Frontend auth layer now has a typed contract baseline.
+
+### Step 30: Add login route in `frontend/app/login/page.tsx`
+
+Objective:
+- Provide dedicated authentication entry point before upload UI.
+
+Approach chosen:
+- Added App Router login page that hosts reusable login form and links back to dashboard.
+
+Alternative considered:
+1. Build upload UI first.
+
+Trade-off:
+- Upload-first can be motivating, but protected flow remains unresolved and causes rework.
+
+Why this choice:
+- Assignment core requires authenticated workflow; login should be stable first.
+
+Validation:
+- Confirmed `/login` route builds and renders via Next.js production build.
+
+Outcome:
+- Frontend has a concrete authentication route for protected workflows.
+
+### Step 31: Add reusable login form in `frontend/components/LoginForm.tsx`
+
+Objective:
+- Isolate credential form logic from page-level layout.
+
+Approach chosen:
+- Added client component with:
+  - controlled email/password inputs
+  - loading and feedback states
+  - login request call
+  - token/session persistence
+  - post-login navigation
+
+Alternative considered:
+1. Keep login form logic directly in page component.
+
+Trade-off:
+- Fewer files now, but harder reuse and larger page complexity.
+
+Why this choice:
+- Reusable form component supports cleaner page structure and future auth variants.
+
+Validation:
+- Ran frontend lint and build successfully after form integration.
+
+Outcome:
+- Frontend auth flow is functional and modular.
+
 ## Step Template (For Next Phases)
 
 ```md

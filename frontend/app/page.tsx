@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const stageItems = [
   { stage: "Stage 1", status: "Done", label: "Project foundation" },
   { stage: "Stage 2", status: "Done", label: "Backend shell" },
@@ -7,7 +9,8 @@ const stageItems = [
   { stage: "Stage 6", status: "Done", label: "Upload + summary flow" },
   { stage: "Stage 7", status: "Done", label: "Anomaly detection" },
   { stage: "Stage 8", status: "Done", label: "Frontend shell" },
-  { stage: "Stage 9", status: "Pending", label: "API/frontend integration" }
+  { stage: "Stage 9", status: "Done", label: "Frontend auth layer" },
+  { stage: "Stage 10", status: "Pending", label: "API/frontend integration" }
 ];
 
 const backendContracts = [
@@ -30,6 +33,11 @@ export default function HomePage() {
           Frontend foundation built after backend contract stabilization. Current shell tracks
           pipeline status and API contract readiness.
         </p>
+        <div className="hero-actions">
+          <Link href="/login" className="btn-secondary">
+            Open Login Flow
+          </Link>
+        </div>
       </section>
 
       <section className="grid">
