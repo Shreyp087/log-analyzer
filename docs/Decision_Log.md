@@ -392,3 +392,66 @@ Rationale:
 
 Result:
 - Summary insights are now both returned by API and stored in database.
+
+## Phase 7: Anomaly Detection
+
+Date: 2026-03-06
+
+## Decision 20: Build anomaly detection after parser normalization is stable
+
+Context:
+- Anomaly rules require clean normalized inputs to avoid noisy/fragile detections.
+
+Selected approach:
+- Added `backend/app/services/anomaly.py` after parsing layer was validated.
+- Implemented rule-based detection with explanations and confidence scores.
+
+Alternatives:
+1. Start anomaly logic earlier during parser development.
+   - Trade-off: More exciting early output, but unstable behavior and frequent refactors.
+
+Rationale:
+- Stable ingestion first makes anomaly rules more reliable and easier to defend.
+
+Result:
+- Detection output is deterministic and grounded in normalized event fields.
+
+## Decision 21: Add scoring helper module for confidence calibration
+
+Context:
+- Confidence/severity logic grows quickly across multiple anomaly rules.
+
+Selected approach:
+- Added `backend/app/services/scoring.py` to centralize confidence math and severity mapping.
+
+Alternatives:
+1. Keep confidence calculations inside anomaly service methods.
+   - Trade-off: Slightly simpler now, but harder to tune consistently later.
+
+Rationale:
+- Central scoring helpers improve consistency and maintainability of detection output.
+
+Result:
+- Confidence scoring is reusable and easier to calibrate over time.
+
+## Decision 22: Persist anomalies during upload processing
+
+Context:
+- Stage 6 ingestion flow already parses and stores events; anomaly stage should extend this flow.
+
+Selected approach:
+- Integrated anomaly detection into `POST /uploads`:
+  - detect anomalies from parsed events
+  - persist `Anomaly` records
+  - update `Summary.total_anomalies`
+  - include anomaly details in response
+
+Alternatives:
+1. Return anomaly findings without persistence.
+   - Trade-off: Simpler response logic, but no historical detection records.
+
+Rationale:
+- Persisted anomalies strengthen the full-stack security story and support downstream review/reporting.
+
+Result:
+- Upload endpoint now provides and stores actionable anomaly intelligence.

@@ -512,6 +512,81 @@ Validation:
 Outcome:
 - Upload response now includes actionable summary insights and persisted analytics baseline.
 
+## Phase 7: Anomaly Detection
+
+Date: 2026-03-06
+
+### Step 19: Add anomaly rules service in `backend/app/services/anomaly.py`
+
+Objective:
+- Detect suspicious events from normalized parser output with explicit explanations.
+
+Approach chosen:
+- Added `detect_anomalies(events)` with rule-based checks:
+  - blocked request
+  - suspicious destination keyword match
+  - zero-byte allowed request
+  - excessive data transfer
+- Each anomaly returns:
+  - anomaly type
+  - explanation text
+  - severity
+  - confidence score
+  - event index reference
+
+Alternative considered:
+1. Start anomaly logic before parser stabilization.
+
+Trade-off:
+- Earlier visible security logic, but fragile behavior due to unstable ingestion format.
+
+Why this choice:
+- Stable normalized events from Stage 5 provide reliable inputs for deterministic rules.
+
+Validation:
+- Executed anomaly detection via upload flow and confirmed anomalies persisted and returned in API response.
+
+Outcome:
+- Rule-based anomaly layer is now active and explainable.
+
+### Step 20: Add scoring helpers in `backend/app/services/scoring.py`
+
+Objective:
+- Keep confidence scoring logic isolated as anomaly rules expand.
+
+Approach chosen:
+- Added helpers for:
+  - score clamping
+  - combining signal boosts/penalties
+  - severity mapping from confidence
+
+Alternative considered:
+1. Keep all scoring logic inline inside anomaly rules.
+
+Trade-off:
+- Slightly fewer files initially, but harder calibration and lower maintainability as rule set grows.
+
+Why this choice:
+- Scoring helper module creates a single place to tune confidence behavior across rules.
+
+Validation:
+- Verified anomaly service uses scoring helpers and produces stable confidence/severity output.
+
+Outcome:
+- Confidence scoring is reusable and easier to evolve.
+
+### Stage 7 Integration Note
+
+Approach chosen:
+- Integrated anomaly detection into `POST /uploads` pipeline:
+  - detect anomalies from parsed events
+  - persist `Anomaly` records
+  - set `Summary.total_anomalies`
+  - return anomaly details in response
+
+Validation:
+- End-to-end test run confirmed upload success with persisted anomalies and updated summary counts.
+
 ## Step Template (For Next Phases)
 
 ```md
