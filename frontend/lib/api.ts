@@ -5,7 +5,8 @@ import type {
   LoginRequest,
   LoginResponse,
   RegisterRequest,
-  RegisterResponse
+  RegisterResponse,
+  UploadResponse
 } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
@@ -93,4 +94,15 @@ export function registerUser(payload: RegisterRequest): Promise<RegisterResponse
 
 export function fetchCurrentUser(token?: string): Promise<AuthenticatedUser> {
   return apiRequest<AuthenticatedUser>("/auth/me", { method: "GET", token });
+}
+
+export function uploadLogFile(file: File, source = "zscaler"): Promise<UploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("source", source);
+
+  return apiRequest<UploadResponse>("/uploads", {
+    method: "POST",
+    body: formData
+  });
 }
