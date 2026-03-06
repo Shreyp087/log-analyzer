@@ -455,3 +455,63 @@ Rationale:
 
 Result:
 - Upload endpoint now provides and stores actionable anomaly intelligence.
+
+## Phase 8: Frontend Shell
+
+Date: 2026-03-06
+
+## Decision 23: Start frontend shell only after backend contracts stabilized
+
+Context:
+- Stage 8 initiated UI work after health/auth/upload/summary/anomaly backend contracts were established.
+
+Selected approach:
+- Built frontend shell referencing real backend endpoints and API base URL expectations.
+
+Alternatives:
+1. UI-first implementation before backend contract stability.
+   - Trade-off: Visually motivating early progress, but high risk of UI/API rework.
+
+Rationale:
+- Backend-first contract clarity reduces frontend integration churn.
+
+Result:
+- Frontend shell now targets known endpoint shapes instead of assumptions.
+
+## Decision 24: Use Next.js TypeScript App Router shell
+
+Context:
+- Need maintainable frontend baseline with clean route/layout conventions.
+
+Selected approach:
+- Added `package.json`, `tsconfig.json`, `next.config.js`, and App Router root files.
+
+Alternatives:
+1. Keep plain React/Vite shell.
+   - Trade-off: Viable, but diverges from requested file structure and app-router workflow.
+2. Delay framework setup and build static HTML first.
+   - Trade-off: Faster prototype, but no scalable project foundation.
+
+Rationale:
+- Next.js App Router offers a clear, production-oriented shell aligned to requested structure.
+
+Result:
+- Frontend now has executable project scaffolding for API integration.
+
+## Decision 25: Build contract-aware landing page rather than decorative placeholder
+
+Context:
+- Initial UI page should support upcoming integration work.
+
+Selected approach:
+- Added `app/page.tsx` displaying live contract checklist (routes + stage progress) and API base URL.
+
+Alternatives:
+1. Create design-only placeholder screen.
+   - Trade-off: Better visual polish early, but weaker technical relevance for integration stage.
+
+Rationale:
+- Contract-aware UI shell provides immediate value for integration and testing.
+
+Result:
+- Frontend page now communicates backend readiness and next integration targets.

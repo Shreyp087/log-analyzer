@@ -4,11 +4,11 @@
 
 Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
 
-Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, Stage 4 minimum working API routes, Stage 5 parsing layer services, Stage 6 upload + summary flow, and Stage 7 anomaly detection.
+Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, Stage 4 minimum working API routes, Stage 5 parsing layer services, Stage 6 upload + summary flow, Stage 7 anomaly detection, and Stage 8 frontend shell.
 
 ## Chosen Stack
 
-- Frontend: TypeScript-based web app (implementation pending)
+- Frontend: Next.js (TypeScript, App Router)
 - Backend API and services: Python
 - Database: PostgreSQL (Docker Compose for local consistency)
 - Data source format: line-based log files in `sample_logs/`
@@ -62,7 +62,14 @@ TBD in Phase 2.
 
 ### Frontend Setup
 
-TBD in Phase 2.
+1. Move into frontend:
+   - `cd frontend`
+2. Install dependencies:
+   - `npm install`
+3. Start dev server:
+   - `npm run dev`
+4. Open:
+   - `http://localhost:3000`
 
 ## Build Checklist
 
@@ -75,7 +82,8 @@ TBD in Phase 2.
 - [x] Stage 5: parser implementation against sample logs
 - [x] Stage 6: upload and summary flow
 - [x] Stage 7: anomaly detection module
-- [ ] Stage 8: API/frontend integration
+- [x] Stage 8: frontend shell
+- [ ] Stage 9: API/frontend integration
 
 ## Documentation Workflow
 

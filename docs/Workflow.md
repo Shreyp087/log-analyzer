@@ -587,6 +587,151 @@ Approach chosen:
 Validation:
 - End-to-end test run confirmed upload success with persisted anomalies and updated summary counts.
 
+## Phase 8: Frontend Shell
+
+Date: 2026-03-06
+
+### Step 21: Replace `frontend/package.json` with real Next.js project scripts/dependencies
+
+Objective:
+- Turn frontend from placeholder scaffold into runnable app shell.
+
+Approach chosen:
+- Added Next.js + React + TypeScript toolchain with `dev`, `build`, `start`, and `lint` scripts.
+
+Alternative considered:
+1. Keep placeholder scripts until UI features are implemented.
+
+Trade-off:
+- Minimal setup now, but delays frontend execution and makes integration harder to validate.
+
+Why this choice:
+- Runnable shell is required before API integration work can proceed cleanly.
+
+Validation:
+- Confirmed package scripts and dependency blocks are present.
+
+Outcome:
+- Frontend project now has executable runtime/build commands.
+
+### Step 22: Add `frontend/tsconfig.json`
+
+Objective:
+- Establish strict TypeScript baseline for Next.js App Router project.
+
+Approach chosen:
+- Added strict TS config with Next plugin, path alias support, and no-emit workflow.
+
+Alternative considered:
+1. Use JavaScript-only shell initially.
+
+Trade-off:
+- Faster first render, but weaker type safety and later migration overhead.
+
+Why this choice:
+- Strong typing aligns with maintainable API contract consumption.
+
+Validation:
+- Confirmed TS include/exclude and Next plugin configuration are set.
+
+Outcome:
+- Frontend type-checking baseline established.
+
+### Step 23: Add `frontend/next.config.js`
+
+Objective:
+- Centralize Next runtime config for shell behavior.
+
+Approach chosen:
+- Added strict mode, typed routes, and `NEXT_PUBLIC_API_BASE_URL` default.
+
+Alternative considered:
+1. Keep default config only.
+
+Trade-off:
+- Less configuration now, but weaker explicitness around API base URL and route typing.
+
+Why this choice:
+- Explicit config reduces ambiguity before API integration.
+
+Validation:
+- Confirmed config file loads ESM export and expected keys.
+
+Outcome:
+- Frontend runtime config is now explicit and ready for contract consumption.
+
+### Step 24: Add `frontend/app/layout.tsx`
+
+Objective:
+- Define global shell layout and metadata.
+
+Approach chosen:
+- Added App Router root layout with global CSS import and selected typography setup.
+
+Alternative considered:
+1. Keep bare default layout.
+
+Trade-off:
+- Faster baseline, but less intentional global structure and weaker visual identity.
+
+Why this choice:
+- Root layout is the correct integration point for global UI shell settings.
+
+Validation:
+- Verified metadata and root structure render path are defined.
+
+Outcome:
+- Frontend has a stable top-level app container.
+
+### Step 25: Add `frontend/app/page.tsx`
+
+Objective:
+- Provide first functional landing page tied to existing backend API shapes.
+
+Approach chosen:
+- Added shell dashboard page displaying:
+  - backend route contract list
+  - build stage progress
+  - API base URL context
+
+Alternative considered:
+1. UI-first mock screen without backend contract references.
+
+Trade-off:
+- More visually motivating, but often causes rework when backend contracts differ.
+
+Why this choice:
+- Contract-aware shell minimizes frontend/backend drift.
+
+Validation:
+- Confirmed page content maps to current backend endpoints and stage status.
+
+Outcome:
+- Frontend shell now communicates real integration targets.
+
+### Step 26: Add `frontend/app/globals.css`
+
+Objective:
+- Establish global styles for desktop/mobile rendering quality.
+
+Approach chosen:
+- Added responsive CSS variables, gradient background, card/grid shell, and typography styles.
+
+Alternative considered:
+1. Keep unstyled defaults.
+
+Trade-off:
+- Lower effort, but less usable shell and weaker demonstration value.
+
+Why this choice:
+- A clear baseline style improves development readability and interview/demo quality.
+
+Validation:
+- Verified stylesheet defines responsive layout behavior and global tokenized styling.
+
+Outcome:
+- Frontend shell is visually coherent and mobile-safe for early integration.
+
 ## Step Template (For Next Phases)
 
 ```md
