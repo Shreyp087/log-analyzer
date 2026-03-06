@@ -1,29 +1,55 @@
 # Log Analyzer
 
-Project scaffold for a log-analysis application with separate frontend and backend services.
+## Project Overview
+
+Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
+
+Current scope is Stage 1 project foundation: baseline documentation, local database container, and canonical sample log input.
+
+## Chosen Stack
+
+- Frontend: TypeScript-based web app (implementation pending)
+- Backend API and services: Python
+- Database: PostgreSQL (Docker Compose for local consistency)
+- Data source format: line-based log files in `sample_logs/`
+
+## Architecture Summary
+
+- Ingestion layer: reads raw log lines from sample or uploaded files.
+- Parsing layer: normalizes log lines into structured records.
+- Detection layer: applies anomaly rules over normalized records.
+- Summary layer: produces aggregates and human-readable findings.
+- Persistence layer: stores processed records and metadata in PostgreSQL.
+
+## Setup (Placeholder)
+
+### Local Development Setup
+
+TBD in Phase 2.
+
+### Environment Configuration
+
+TBD in Phase 2.
+
+### Backend Setup
+
+TBD in Phase 2.
+
+### Frontend Setup
+
+TBD in Phase 2.
+
+## Build Checklist
+
+- [x] Stage 1: README foundation skeleton
+- [x] Stage 1: PostgreSQL-only `docker-compose.yml`
+- [x] Stage 1: canonical sample log (`sample_logs/sample_zscaler.log`)
+- [ ] Stage 2: parser implementation against sample logs
+- [ ] Stage 3: anomaly detection module
+- [ ] Stage 4: summarization pipeline
+- [ ] Stage 5: API and frontend integration
 
 ## Documentation Workflow
 
-To keep execution and reasoning interview-ready, use:
-
-- `docs/WORKFLOW.md` for step-by-step execution standards
-- `docs/DECISION_LOG.md` to record approach alternatives, trade-offs, and rationale
-
-## Structure
-
-- `frontend/`: frontend app shell (`app`, `components`, `lib`, `package.json`)
-- `backend/`: Python API and analysis services
-- `sample_logs/`: sample CSV datasets for testing
-- `docs/`: workflow standard and decision records
-- `docker-compose.yml`: local multi-service runtime template
-
-## Quick Start
-
-1. Backend
-   - `cd backend`
-   - `pip install -r requirements.txt`
-   - `python app.py`
-2. Frontend
-   - `cd frontend`
-   - `npm install`
-   - `npm run dev`
+- [docs/Workflow.md](docs/Workflow.md): execution steps and rationale format
+- [docs/Decision_Log.md](docs/Decision_Log.md): alternatives, trade-offs, and decisions

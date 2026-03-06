@@ -1,0 +1,6 @@
+# sample_zscaler.log
+# Format: timestamp user source_ip destination_url action category bytes
+2026-03-06T14:02:11Z alice 10.12.4.8 https://www.example.com ALLOW Business 15320
+2026-03-06T14:02:34Z bob 10.12.4.19 https://docs.python.org ALLOW Technology 22841
+2026-03-06T14:03:02Z carol 10.12.4.25 https://malicious-test.example BLOCK Security 0
+2026-03-06T14:03:48Z dave 10.12.4.33 https://intranet.local ALLOW Internal 8921
