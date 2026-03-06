@@ -93,6 +93,128 @@ Validation:
 Outcome:
 - Parser design can proceed with concrete input assumptions.
 
+## Phase 2: Backend Shell
+
+Date: 2026-03-06
+
+### Step 4: Expand backend dependencies (`requirements.txt`)
+
+Objective:
+- Define all packages needed for app boot, database integration, JWT, and migrations.
+
+Approach chosen:
+- Updated `backend/requirements.txt` with Flask, Flask-SQLAlchemy, Flask-Migrate, Flask-JWT-Extended, `psycopg2-binary`, and `python-dotenv`.
+
+Alternative considered:
+1. Keep only Flask and add packages later.
+
+Trade-off:
+- Smaller initial dependency list, but repeated boot failures and fragmented setup in later steps.
+
+Why this choice:
+- A complete dependency baseline allows the backend shell to be installed and run as one unit.
+
+Validation:
+- Verified requirement entries include all Stage 2 dependency categories.
+
+Outcome:
+- Backend install contract is now explicit.
+
+### Step 5: Add environment template (`.env.example`)
+
+Objective:
+- Make runtime configuration explicit and reproducible.
+
+Approach chosen:
+- Added `backend/.env.example` with app host/port, Flask mode, secret keys, JWT key, and DB URL.
+
+Alternative considered:
+1. Hardcode all config in Python files.
+
+Trade-off:
+- Fewer files at first, but weaker security hygiene and difficult environment switching.
+
+Why this choice:
+- Template-driven env config improves onboarding and separates code from secrets.
+
+Validation:
+- Confirmed all critical runtime variables are documented in a copy-ready template.
+
+Outcome:
+- Backend configuration is now discoverable and standardized.
+
+### Step 6: Create runtime entrypoint (`run.py`)
+
+Objective:
+- Provide a single command target to start the backend.
+
+Approach chosen:
+- Added `backend/run.py` that instantiates the app via factory and runs using config-driven host/port/debug.
+
+Alternative considered:
+1. Keep startup logic directly inside package modules.
+
+Trade-off:
+- Slightly fewer files, but less clear launch boundary and harder migration to WSGI/ASGI commands later.
+
+Why this choice:
+- A dedicated entrypoint keeps startup behavior explicit and clean.
+
+Validation:
+- Verified `run.py` imports `create_app()` and starts the app from centralized config.
+
+Outcome:
+- Backend startup command is standardized.
+
+### Step 7: Centralize configuration (`app/config.py`)
+
+Objective:
+- Remove scattered settings and enforce environment-based config.
+
+Approach chosen:
+- Added `backend/app/config.py` with `BaseConfig`, environment-specific classes, and a `get_config()` selector.
+
+Alternative considered:
+1. Inline all settings in app initialization.
+
+Trade-off:
+- Quicker initially, but higher coupling and poor maintainability as settings grow.
+
+Why this choice:
+- Central config reduces drift and keeps environment behavior predictable.
+
+Validation:
+- Confirmed config includes DB URI, secrets, app network settings, and dev/test/prod modes.
+
+Outcome:
+- Configuration behavior is centralized and extensible.
+
+### Step 8: Build app factory shell (`app/__init__.py`)
+
+Objective:
+- Make backend boot cleanly with extension setup and route registration.
+
+Approach chosen:
+- Added app factory pattern in `backend/app/__init__.py`, initialized DB/JWT/Migrate extensions, and registered routes through `backend/routes`.
+
+Alternative considered:
+1. Single-file app (`app.py`) with inline setup.
+
+Trade-off:
+- Faster initial coding, but harder to scale cleanly across modules, tests, and migrations.
+
+Why this choice:
+- Factory pattern is cleaner for growth, testing, and future CLI/migration integration.
+
+Validation:
+- Added `backend/routes/__init__.py` and `backend/routes/health.py`.
+- Removed legacy single-file `backend/app.py`.
+- Ran syntax validation (`python -m compileall backend`) to confirm files compile.
+- Attempted import boot check (`python -c "from app import create_app"` path-adjusted); local environment is missing installed dependencies, so full runtime boot was not executed yet.
+
+Outcome:
+- Backend shell is structured, modular, and ready for parser/upload logic next.
+
 ## Step Template (For Next Phases)
 
 ```md

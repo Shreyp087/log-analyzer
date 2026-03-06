@@ -4,7 +4,7 @@
 
 Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
 
-Current scope is Stage 1 project foundation: baseline documentation, local database container, and canonical sample log input.
+Current scope includes Stage 1 foundation and Stage 2 backend shell bootstrapping.
 
 ## Chosen Stack
 
@@ -33,7 +33,14 @@ TBD in Phase 2.
 
 ### Backend Setup
 
-TBD in Phase 2.
+1. Copy env template:
+   - `cd backend`
+   - `cp .env.example .env` (Linux/macOS)
+   - `Copy-Item .env.example .env` (PowerShell)
+2. Install dependencies:
+   - `pip install -r requirements.txt`
+3. Start app:
+   - `python run.py`
 
 ### Frontend Setup
 
@@ -44,10 +51,11 @@ TBD in Phase 2.
 - [x] Stage 1: README foundation skeleton
 - [x] Stage 1: PostgreSQL-only `docker-compose.yml`
 - [x] Stage 1: canonical sample log (`sample_logs/sample_zscaler.log`)
-- [ ] Stage 2: parser implementation against sample logs
-- [ ] Stage 3: anomaly detection module
-- [ ] Stage 4: summarization pipeline
-- [ ] Stage 5: API and frontend integration
+- [x] Stage 2: backend shell (`run.py`, app factory, config, env template)
+- [ ] Stage 3: parser implementation against sample logs
+- [ ] Stage 4: anomaly detection module
+- [ ] Stage 5: summarization pipeline
+- [ ] Stage 6: API and frontend integration
 
 ## Documentation Workflow
 

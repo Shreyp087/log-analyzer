@@ -77,3 +77,83 @@ Rationale:
 
 Result:
 - Local changes remain staged/committed as needed until push is explicitly requested.
+
+## Phase 2: Backend Shell
+
+Date: 2026-03-06
+
+## Decision 5: Build runnable backend shell before parser/upload logic
+
+Context:
+- Stage 2 required a clean boot path before implementing ingestion features.
+
+Selected approach:
+- Implement backend shell first: dependency baseline, env template, app entrypoint, centralized config, and app factory.
+
+Alternatives:
+1. Implement uploads/parsing directly on top of minimal existing structure.
+   - Trade-off: Faster feature coding initially, but repeated refactoring when adding DB, auth, and migrations.
+
+Rationale:
+- A stable bootstrapped shell reduces rework and keeps future logic changes isolated.
+
+Result:
+- Backend is structurally ready for feature work without architecture churn.
+
+## Decision 6: Use modular app factory instead of single `app.py`
+
+Context:
+- Need maintainable initialization for DB, JWT, migrations, and routes.
+
+Selected approach:
+- Replace legacy single-file `backend/app.py` with:
+  - `backend/run.py` as entrypoint
+  - `backend/app/config.py` as central config
+  - `backend/app/__init__.py` as factory and extension init
+  - explicit route registration in `backend/routes`
+
+Alternatives:
+1. Keep one `backend/app.py` file.
+   - Trade-off: Quicker initially, but harder to scale cleanly for testing, migrations, and module boundaries.
+
+Rationale:
+- Factory pattern keeps boot logic clean and supports long-term maintainability.
+
+Result:
+- Initialization is modular and ready for next-stage features.
+
+## Decision 7: Define backend dependencies up front
+
+Context:
+- Stage 2 required Flask app boot with database, JWT, and migration support.
+
+Selected approach:
+- Explicitly add package requirements for each capability category.
+
+Alternatives:
+1. Add dependencies only when an import fails during development.
+   - Trade-off: Smaller starting file, but unstable onboarding and unpredictable setup failures.
+
+Rationale:
+- Upfront dependency declaration provides deterministic environment setup.
+
+Result:
+- Backend installation requirements are complete and documented.
+
+## Decision 8: Add `.env.example` before real secret usage
+
+Context:
+- Configuration variables must be visible without committing secrets.
+
+Selected approach:
+- Add `backend/.env.example` with all expected keys and safe placeholder values.
+
+Alternatives:
+1. Document env vars only in README text.
+   - Trade-off: Less file overhead, but easier to miss variables and copy errors.
+
+Rationale:
+- Template file is the most practical onboarding artifact for environment setup.
+
+Result:
+- Config initialization is explicit, repeatable, and safer.
