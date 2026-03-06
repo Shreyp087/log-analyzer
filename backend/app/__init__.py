@@ -23,7 +23,7 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     migrate.init_app(app, db)
     from app import models  # noqa: F401
 
-    from routes import register_routes
+    from app.routes import register_routes
 
     register_routes(app)
     return app

@@ -6,8 +6,8 @@ load_dotenv()
 
 
 class BaseConfig:
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret")
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me-at-least-32")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret-key-change-me-at-least-32")
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
         "postgresql://log_user:log_password@localhost:5432/log_analyzer",

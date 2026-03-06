@@ -4,7 +4,7 @@
 
 Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
 
-Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, and Stage 3 data model + migrations.
+Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, and Stage 4 minimum working API routes.
 
 ## Chosen Stack
 
@@ -43,6 +43,11 @@ TBD in Phase 2.
    - `python -m flask --app run.py db upgrade`
 4. Start app:
    - `python run.py`
+5. Verify core routes:
+   - `GET /health`
+   - `POST /auth/register`
+   - `POST /auth/login`
+   - `GET /auth/me` (Bearer token)
 
 ### Frontend Setup
 
@@ -55,10 +60,11 @@ TBD in Phase 2.
 - [x] Stage 1: canonical sample log (`sample_logs/sample_zscaler.log`)
 - [x] Stage 2: backend shell (`run.py`, app factory, config, env template)
 - [x] Stage 3: data model + initial migrations
-- [ ] Stage 4: parser implementation against sample logs
-- [ ] Stage 5: anomaly detection module
-- [ ] Stage 6: summarization pipeline
-- [ ] Stage 7: API and frontend integration
+- [x] Stage 4: minimum working API (`health`, `auth`)
+- [ ] Stage 5: parser implementation against sample logs
+- [ ] Stage 6: anomaly detection module
+- [ ] Stage 7: summarization pipeline
+- [ ] Stage 8: API/frontend integration
 
 ## Documentation Workflow
 
