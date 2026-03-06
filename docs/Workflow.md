@@ -276,6 +276,85 @@ Validation:
 Outcome:
 - Initial migration baseline is now present and ready for `db upgrade`.
 
+## Phase 4: Minimum Working API
+
+Date: 2026-03-06
+
+### Step 11: Add health route in `backend/app/routes/health.py`
+
+Objective:
+- Provide a zero-dependency endpoint that confirms app boot and route registration.
+
+Approach chosen:
+- Added `GET /health` returning `{ "status": "ok" }`.
+
+Alternative considered:
+1. Start directly with upload or parser routes.
+
+Trade-off:
+- Faster visible feature progress, but weaker base verification if startup/routing is broken.
+
+Why this choice:
+- Health route gives immediate operational confirmation and shortens debugging loop.
+
+Validation:
+- Verified `health_bp` registration in app route package.
+
+Outcome:
+- Minimal operational readiness endpoint is available.
+
+### Step 12: Add auth routes in `backend/app/routes/auth.py`
+
+Objective:
+- Prove protected workflow path with register/login and token-based identity endpoint.
+
+Approach chosen:
+- Added endpoints:
+  - `POST /auth/register`
+  - `POST /auth/login`
+  - `GET /auth/me` (JWT-protected)
+- Routes integrate with `User` model and SQLAlchemy session.
+
+Alternative considered:
+1. Build upload route first.
+
+Trade-off:
+- Upload-first gives faster visible product value, but leaves auth design unresolved and increases refactor risk for protected endpoints later.
+
+Why this choice:
+- Authentication is foundational and should be settled before data-ingest workflows.
+
+Validation:
+- Executed Flask test-client flow for register -> login -> me using JWT access token.
+
+Outcome:
+- Minimum auth lifecycle is functional.
+
+### Step 13: Add security helpers in `backend/app/utils/security.py`
+
+Objective:
+- Keep credential handling centralized and reusable.
+
+Approach chosen:
+- Added helper functions:
+  - `hash_password()`
+  - `verify_password()`
+
+Alternative considered:
+1. Inline password hashing logic inside route handlers.
+
+Trade-off:
+- Slightly fewer files now, but weaker separation of concerns and harder testing/reuse.
+
+Why this choice:
+- Small utility module keeps auth route logic focused and maintainable.
+
+Validation:
+- Verified auth routes call helper functions for both register and login flows.
+
+Outcome:
+- Password handling is encapsulated and ready for future security hardening.
+
 ## Step Template (For Next Phases)
 
 ```md

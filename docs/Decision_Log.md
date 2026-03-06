@@ -224,3 +224,61 @@ Rationale:
 
 Result:
 - `pip install -r backend/requirements.txt` validated successfully in this environment.
+
+## Phase 4: Minimum Working API
+
+Date: 2026-03-06
+
+## Decision 12: Implement health route first
+
+Context:
+- Stage 4 required the smallest useful API path with high confidence in app readiness.
+
+Selected approach:
+- Added `GET /health` in `backend/app/routes/health.py`.
+
+Alternatives:
+1. Start with upload route first.
+   - Trade-off: Faster feature visibility, but slower root-cause isolation if core boot/routing fails.
+
+Rationale:
+- Health endpoint is the fastest reliable proof that app initialization and route registration work.
+
+Result:
+- Basic runtime readiness check is available.
+
+## Decision 13: Implement auth before upload
+
+Context:
+- Protected workflow is a core requirement and must be validated early.
+
+Selected approach:
+- Added `register`, `login`, and JWT-protected `me` endpoints in `backend/app/routes/auth.py`.
+
+Alternatives:
+1. Build upload route before auth.
+   - Trade-off: Faster visible value, but authentication concerns are deferred and often cause later API redesign.
+
+Rationale:
+- Early auth baseline reduces downstream coupling risks and clarifies protected route patterns.
+
+Result:
+- Minimum secure workflow is established for upcoming upload/parse routes.
+
+## Decision 14: Extract password handling into utility module
+
+Context:
+- Auth route handlers should remain focused on request/response flow.
+
+Selected approach:
+- Added `backend/app/utils/security.py` with `hash_password` and `verify_password`.
+
+Alternatives:
+1. Keep hashing logic inline in auth handlers.
+   - Trade-off: Fewer modules, but lower reusability and harder testing.
+
+Rationale:
+- Utility isolation improves maintainability and keeps security behavior centralized.
+
+Result:
+- Credential handling is consistent and reusable.
