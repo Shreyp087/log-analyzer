@@ -327,3 +327,68 @@ Rationale:
 
 Result:
 - Parsing code is cleaner and easier to evolve for additional log sources.
+
+## Phase 6: Upload and Summary Flow
+
+Date: 2026-03-06
+
+## Decision 17: Implement persisted upload pipeline instead of transient parse response
+
+Context:
+- Stage 6 required connecting ingestion to persistence for end-to-end utility.
+
+Selected approach:
+- Added authenticated `POST /uploads` route that stores upload metadata, saves file, parses rows, persists events, and persists summary.
+
+Alternatives:
+1. Upload and return parsed JSON without storing.
+   - Trade-off: Simpler and faster, but weaker full-stack architecture story and no durable records.
+
+Rationale:
+- Persisted ingestion enables auditability, repeatability, and future analytics workflows.
+
+Result:
+- Application now supports useful end-to-end ingest -> parse -> persist behavior.
+
+## Decision 18: Extract storage logic into `storage.py`
+
+Context:
+- Upload processing requires consistent file naming and path handling.
+
+Selected approach:
+- Added storage helpers for deterministic filename generation and file save operations.
+
+Alternatives:
+1. Keep file save logic inline in upload route.
+   - Trade-off: Less initial structure, but route complexity and duplicated storage behavior.
+
+Rationale:
+- Dedicated storage service keeps route handlers focused and storage behavior reusable.
+
+Result:
+- File handling is centralized and easier to evolve.
+
+## Decision 19: Implement summary generation in dedicated service and persist richer metrics
+
+Context:
+- Upload endpoint should produce actionable post-ingest insights.
+
+Selected approach:
+- Added `summary.py` for metrics generation and expanded `Summary` schema with:
+  - `unique_source_ips`
+  - `top_categories`
+  - `top_destinations`
+  - `top_source_ips`
+- Added migration to support new persisted summary fields plus `Upload.file_path`.
+
+Alternatives:
+1. Compute summary only in response and skip persistence.
+   - Trade-off: Quick response value, but no historical summary storage.
+2. Compute summary inside route directly.
+   - Trade-off: Fewer files, but lower testability and reuse.
+
+Rationale:
+- Service-based summary logic with persistence creates a stronger architecture baseline for reporting and anomaly stages.
+
+Result:
+- Summary insights are now both returned by API and stored in database.

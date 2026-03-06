@@ -417,6 +417,101 @@ Validation:
 Outcome:
 - Parser internals are cleaner and easier to extend for additional log formats.
 
+## Phase 6: Upload and Summary Flow
+
+Date: 2026-03-06
+
+### Step 16: Add authenticated upload route in `backend/app/routes/uploads.py`
+
+Objective:
+- Connect ingestion, parsing, and persistence through a single protected endpoint.
+
+Approach chosen:
+- Added `POST /uploads` with JWT protection.
+- Endpoint flow:
+  - validates multipart file input and source
+  - resolves authenticated user
+  - persists `Upload` record
+  - stores file on disk via storage service
+  - parses rows via parser service
+  - persists `Event` rows
+  - computes and persists `Summary`
+  - returns upload status, parse errors, and summary payload
+
+Alternative considered:
+1. Upload and return parsed JSON without storing.
+
+Trade-off:
+- Simpler implementation, but weaker full-stack story and no durable analysis history.
+
+Why this choice:
+- Persisted upload flow creates real end-to-end backend value and supports future analytics features.
+
+Validation:
+- Executed Flask test-client upload flow with authenticated user and `sample_zscaler.log`.
+- Verified HTTP `201` and persisted records (`Upload=1`, `Event=4`, `Summary=1` in test run).
+
+Outcome:
+- End-to-end ingestion pipeline is now operational.
+
+### Step 17: Add storage helpers in `backend/app/services/storage.py`
+
+Objective:
+- Centralize file path generation and disk save behavior.
+
+Approach chosen:
+- Added `build_storage_filename()` and `save_upload_file()`.
+- Storage includes unique filename generation with upload ID, timestamp, and random suffix.
+
+Alternative considered:
+1. Save files inline in route with ad hoc paths.
+
+Trade-off:
+- Faster initially, but higher risk of path collisions and less reusable logic.
+
+Why this choice:
+- Dedicated storage helper keeps route code focused and makes file-handling behavior consistent.
+
+Validation:
+- Confirmed uploaded file is written to configured upload directory and filename returned in response.
+
+Outcome:
+- File persistence is deterministic and reusable.
+
+### Step 18: Add summary generator in `backend/app/services/summary.py`
+
+Objective:
+- Produce key aggregate metrics required after ingesting parsed events.
+
+Approach chosen:
+- Added `generate_summary_metrics()` to compute:
+  - total events
+  - blocked events
+  - unique IPs
+  - top categories
+  - top destinations
+  - top source IPs
+- Persisted these metrics into `Summary` record.
+
+Alternative considered:
+1. Compute summary directly inside upload route.
+
+Trade-off:
+- Less abstraction initially, but harder testing and lower reuse in future batch jobs.
+
+Why this choice:
+- Service-level summary logic is easier to validate and reuse across workflows.
+
+Validation:
+- Verified summary payload and persisted fields from sample upload:
+  - `total_events=4`
+  - `blocked_events=1`
+  - `unique_ips=4`
+  - top lists populated for categories/destinations/source IPs.
+
+Outcome:
+- Upload response now includes actionable summary insights and persisted analytics baseline.
+
 ## Step Template (For Next Phases)
 
 ```md

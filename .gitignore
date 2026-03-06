@@ -6,6 +6,7 @@ __pycache__/
 .env
 backend/.env
 backend/instance/
+backend/uploads/
 
 # Virtual environments
 .venv/
