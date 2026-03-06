@@ -1,0 +1,13 @@
+# suspicious_zscaler.log
+# Format: timestamp user source_ip destination_url action category bytes
+# Purpose: concentrated anomaly signals for demo and walkthrough
+2026-03-06T19:10:05Z eve 10.44.2.8 https://cdn-malicious-payload.example BLOCK Security 0
+2026-03-06T19:11:14Z frank 10.44.2.19 https://c2.darkweb-relay.example ALLOW Malware 73400320
+2026-03-06T19:12:21Z grace 10.44.2.33 https://updates.company.com ALLOW Business 0
+2026-03-06T19:13:02Z henry 10.44.2.41 https://tor-gateway.example BLOCK Phishing 12
+2026-03-06T19:13:47Z irene 10.44.2.55 https://archive.company.com ALLOW Internal 84512965
+2026-03-06T19:14:29Z jack 10.44.2.66 https://docs.python.org ALLOW Technology 22841
+2026-03-06T19:15:03Z kelly 10.44.2.77 https://phish-landing.example ALLOW Security 1024
+2026-03-06T19:16:11Z liam 10.44.2.88 https://mail.company.com PERMIT Collaboration 0
+2026-03-06T19:17:35Z maya 10.44.2.93 https://cnc-control.example BLOCK Malware 4096
+2026-03-06T19:18:22Z nora 10.44.2.104 https://finance.company.com ALLOW Finance 52100000
