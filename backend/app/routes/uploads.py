@@ -5,7 +5,8 @@ from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app import db
-from app.models import Event, Summary, Upload, User
+from app.models import Anomaly, Event, Summary, Upload, User
+from app.services.anomaly import detect_anomalies
 from app.services.parser import parse_zscaler_lines
 from app.services.storage import save_upload_file
 from app.services.summary import generate_summary_metrics
@@ -48,12 +49,32 @@ def upload_log_file():
         parsed_events, parse_errors = parse_zscaler_lines(lines)
         event_models = [Event(upload_id=upload.id, **event_data) for event_data in parsed_events]
         db.session.add_all(event_models)
+        db.session.flush()
+
+        detected_anomalies = detect_anomalies(parsed_events)
+        anomaly_models = []
+        for anomaly_data in detected_anomalies:
+            event_index = anomaly_data.get("event_index")
+            if event_index is None or event_index >= len(event_models):
+                continue
+
+            anomaly_models.append(
+                Anomaly(
+                    upload_id=upload.id,
+                    event_id=event_models[event_index].id,
+                    anomaly_type=anomaly_data["anomaly_type"],
+                    severity=anomaly_data["severity"],
+                    score=anomaly_data["confidence"],
+                    description=anomaly_data["description"],
+                )
+            )
+        db.session.add_all(anomaly_models)
 
         metrics = generate_summary_metrics(parsed_events)
         summary = Summary(
             upload_id=upload.id,
             total_events=metrics["total_events"],
-            total_anomalies=0,
+            total_anomalies=len(anomaly_models),
             allowed_count=metrics["allowed_events"],
             blocked_count=metrics["blocked_events"],
             unique_source_ips=metrics["unique_ips"],
@@ -79,10 +100,12 @@ def upload_log_file():
                 "stored_file": os.path.basename(upload.file_path or ""),
                 "status": upload.status,
                 "events_saved": len(parsed_events),
+                "anomalies_detected": len(anomaly_models),
                 "parse_errors_count": len(parse_errors),
                 "parse_errors": parse_errors[:20],
                 "summary": {
                     "total_events": summary.total_events,
+                    "total_anomalies": summary.total_anomalies,
                     "blocked_events": summary.blocked_count,
                     "allowed_events": summary.allowed_count,
                     "unique_ips": summary.unique_source_ips,
@@ -90,6 +113,16 @@ def upload_log_file():
                     "top_destinations": summary.top_destinations,
                     "top_source_ips": summary.top_source_ips,
                 },
+                "anomalies": [
+                    {
+                        "event_id": anomaly.event_id,
+                        "anomaly_type": anomaly.anomaly_type,
+                        "severity": anomaly.severity,
+                        "confidence": anomaly.score,
+                        "description": anomaly.description,
+                    }
+                    for anomaly in anomaly_models[:20]
+                ],
             }
         ),
         201,
