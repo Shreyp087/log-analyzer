@@ -11,3 +11,9 @@ backend/uploads/
 # Virtual environments
 .venv/
 venv/
+
+# Node / Next.js artifacts
+node_modules/
+.next/
+frontend/node_modules/
+frontend/.next/
