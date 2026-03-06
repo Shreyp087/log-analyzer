@@ -66,6 +66,16 @@ export interface UploadParseErrorPayload {
   raw_line: string;
 }
 
+export interface UploadEventPreview {
+  event_time: string | null;
+  username: string | null;
+  source_ip: string | null;
+  destination: string | null;
+  action: string | null;
+  category: string | null;
+  bytes_transferred: number | null;
+}
+
 export interface UploadResponse {
   upload_id: number;
   filename: string;
@@ -75,6 +85,7 @@ export interface UploadResponse {
   anomalies_detected: number;
   parse_errors_count: number;
   parse_errors: UploadParseErrorPayload[];
+  events_preview: UploadEventPreview[];
   summary: UploadSummaryPayload;
   anomalies: UploadAnomalyPayload[];
 }

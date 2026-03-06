@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { DragEvent, useMemo, useState } from "react";
 
 import { ApiRequestError, uploadLogFile } from "@/lib/api";
@@ -55,6 +56,9 @@ export default function UploadDropzone({ onUploaded }: UploadDropzoneProps) {
 
     try {
       const payload = await uploadLogFile(file, "zscaler");
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`analysis_result_${payload.upload_id}`, JSON.stringify(payload));
+      }
       setResult(payload);
       onUploaded?.(payload);
     } catch (err) {
@@ -119,6 +123,11 @@ export default function UploadDropzone({ onUploaded }: UploadDropzoneProps) {
               <code>unique_ips</code>: {result.summary.unique_ips}
             </li>
           </ul>
+          <div className="hero-actions">
+            <Link href={`/analysis/${result.upload_id}`} className="btn-secondary">
+              View Full Analysis
+            </Link>
+          </div>
         </div>
       ) : null}
     </section>

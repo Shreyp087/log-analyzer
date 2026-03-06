@@ -11,7 +11,7 @@ const stageItems = [
   { stage: "Stage 8", status: "Done", label: "Frontend shell" },
   { stage: "Stage 9", status: "Done", label: "Frontend auth layer" },
   { stage: "Stage 10", status: "Done", label: "Frontend upload workflow" },
-  { stage: "Stage 11", status: "Pending", label: "API/frontend integration polish" }
+  { stage: "Stage 11", status: "Done", label: "Analysis display workflow" }
 ];
 
 const backendContracts = [

@@ -285,6 +285,137 @@ code {
   font-size: 0.95rem;
 }
 
+.analysis-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin-bottom: 1rem;
+}
+
+.analysis-card {
+  background: var(--card);
+  border: 1px solid #ffffff;
+  border-radius: 14px;
+  padding: 0.85rem;
+  box-shadow: 0 8px 20px var(--shadow);
+}
+
+.analysis-card h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.analysis-value {
+  margin: 0.4rem 0 0.2rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.analysis-card small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.analysis-section {
+  background: var(--card);
+  border: 1px solid #ffffff;
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 10px 24px var(--shadow);
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.section-head span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+  font-size: 0.82rem;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.55rem 0.45rem;
+  border-bottom: 1px solid rgba(20, 34, 47, 0.11);
+  vertical-align: top;
+}
+
+.data-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.truncate {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sev-chip {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sev-high {
+  background: rgba(177, 37, 37, 0.14);
+  color: #8c1f1f;
+}
+
+.sev-medium {
+  background: rgba(218, 95, 31, 0.15);
+  color: #9a4a1d;
+}
+
+.sev-low {
+  background: rgba(19, 123, 88, 0.14);
+  color: #136548;
+}
+
+.findings-panel {
+  margin-bottom: 0;
+}
+
+.findings-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 560px) {
   .shell {
     padding: 1.4rem 0.75rem 2.2rem;
@@ -297,5 +428,21 @@ code {
 
   .auth-card {
     padding: 0.95rem;
+  }
+
+  .analysis-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analysis-card {
+    padding: 0.75rem;
+  }
+
+  .analysis-value {
+    font-size: 1.15rem;
+  }
+
+  .analysis-section {
+    padding: 0.8rem;
   }
 }
