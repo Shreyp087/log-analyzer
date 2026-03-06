@@ -4,7 +4,7 @@
 
 Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
 
-Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, Stage 4 minimum working API routes, Stage 5 parsing layer services, Stage 6 upload + summary flow, Stage 7 anomaly detection, Stage 8 frontend shell, Stage 9 frontend auth layer, and Stage 10 upload UI workflow.
+Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, Stage 3 data model + migrations, Stage 4 minimum working API routes, Stage 5 parsing layer services, Stage 6 upload + summary flow, Stage 7 anomaly detection, Stage 8 frontend shell, Stage 9 frontend auth layer, Stage 10 upload UI workflow, and Stage 11 analysis display.
 
 ## Chosen Stack
 
@@ -69,6 +69,12 @@ TBD in Phase 2.
     - `frontend/app/dashboard/page.tsx`
     - `frontend/app/upload/page.tsx`
     - `frontend/components/UploadDropzone.tsx`
+11. Frontend analysis modules:
+    - `frontend/app/analysis/[id]/page.tsx`
+    - `frontend/components/SummaryCards.tsx`
+    - `frontend/components/TimelineTable.tsx`
+    - `frontend/components/AnomaliesTable.tsx`
+    - `frontend/components/FindingsPanel.tsx`
 
 ### Frontend Setup
 
@@ -95,7 +101,7 @@ TBD in Phase 2.
 - [x] Stage 8: frontend shell
 - [x] Stage 9: frontend auth layer
 - [x] Stage 10: upload UI workflow
-- [ ] Stage 11: API/frontend integration
+- [x] Stage 11: analysis display workflow
 
 ## Documentation Workflow
 

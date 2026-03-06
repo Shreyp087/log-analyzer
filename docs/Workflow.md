@@ -955,6 +955,151 @@ Validation:
 Outcome:
 - First full authenticated user workflow (login -> dashboard -> upload) is now implemented.
 
+## Phase 11: Analysis Display
+
+Date: 2026-03-06
+
+### Step 35: Add analysis route in `frontend/app/analysis/[id]/page.tsx`
+
+Objective:
+- Render full analysis output after a successful upload.
+
+Approach chosen:
+- Added protected analysis page that:
+  - validates auth session
+  - reads upload analysis payload by ID from browser storage
+  - renders summary, timeline, anomalies, and findings in ordered sections
+  - handles missing analysis data with recovery navigation
+
+Alternative considered:
+1. Fetch analysis details from a new backend `GET /uploads/{id}` endpoint.
+
+Trade-off:
+- Backend fetch route is more durable and shareable across sessions, but requires extra backend contract work not scoped to this stage.
+
+Why this choice:
+- Stage 11 focused on analysis rendering; local cached payload enables immediate display with minimal backend churn.
+
+Validation:
+- Confirmed dynamic route file exists and composes all Stage 11 components in the requested order.
+
+Outcome:
+- Frontend now has dedicated analysis result page.
+
+### Step 36: Build summary section component in `frontend/components/SummaryCards.tsx`
+
+Objective:
+- Surface highest-level analysis metrics first.
+
+Approach chosen:
+- Implemented reusable summary cards for totals, blocked ratio, anomalies, unique IPs, and parse errors.
+
+Alternative considered:
+1. Show metrics inline in the analysis page without component extraction.
+
+Trade-off:
+- Inline rendering is faster initially, but lowers reusability and increases page complexity.
+
+Why this choice:
+- Summary cards form a stable reusable block and match the requested top-down analysis narrative.
+
+Validation:
+- Verified metric mapping aligns to backend upload response fields.
+
+Outcome:
+- Analysis page now starts with concise high-level KPI visibility.
+
+### Step 37: Build timeline section component in `frontend/components/TimelineTable.tsx`
+
+Objective:
+- Show event-level detail after summary context.
+
+Approach chosen:
+- Added event preview table with columns for time, user, source IP, action, category, destination, and bytes.
+
+Alternative considered:
+1. Render raw JSON event preview payload.
+
+Trade-off:
+- Raw JSON is quicker to implement but less readable and weaker for analyst workflows.
+
+Why this choice:
+- Structured table improves scanability and preserves a clear timeline flow.
+
+Validation:
+- Confirmed component gracefully handles empty event preview data.
+
+Outcome:
+- Event-level analysis is now visible in an analyst-friendly format.
+
+### Step 38: Build anomaly section component in `frontend/components/AnomaliesTable.tsx`
+
+Objective:
+- Display anomaly detections with severity and confidence details.
+
+Approach chosen:
+- Added anomaly table with severity chips and confidence percentage formatting.
+
+Alternative considered:
+1. Merge anomalies into timeline rows.
+
+Trade-off:
+- Single table reduces components but mixes concerns and weakens focused anomaly review.
+
+Why this choice:
+- Dedicated anomaly section keeps threat signals clearly separated from baseline event telemetry.
+
+Validation:
+- Confirmed severity class mapping and fallback empty-state rendering.
+
+Outcome:
+- Anomaly details are now explicit and visually prioritized.
+
+### Step 39: Build findings panel in `frontend/components/FindingsPanel.tsx`
+
+Objective:
+- Provide short, interview-friendly narrative takeaways from computed metrics.
+
+Approach chosen:
+- Added derived findings list (status, blocked ratio, top category/destination/source, anomaly and parse-error notes).
+
+Alternative considered:
+1. Skip findings and rely only on raw tables/cards.
+
+Trade-off:
+- Raw-only display is simpler, but less effective for rapid interpretation and presentation.
+
+Why this choice:
+- Findings panel summarizes implications and improves communication of analysis outcomes.
+
+Validation:
+- Confirmed findings are generated from response fields without extra backend dependencies.
+
+Outcome:
+- Stage 11 analysis page now includes an explicit interpretation layer.
+
+### Stage 11 Integration Note
+
+Approach chosen:
+- Updated upload flow to persist successful response payload by upload ID and added "View Full Analysis" navigation.
+- Extended upload API response with `events_preview` payload for timeline rendering.
+- Added CSS classes for analysis grid, tables, severity chips, and findings panel.
+
+Alternative considered:
+1. Delay persistence/navigation wiring until a dedicated backend retrieval endpoint exists.
+
+Trade-off:
+- Delayed wiring reduces short-term complexity, but blocks end-to-end Stage 11 usability.
+
+Why this choice:
+- Immediate local handoff enables full analysis rendering now while preserving room for later backend retrieval enhancement.
+
+Validation:
+- Verified compile/lint/build checks after integration changes.
+
+Outcome:
+- Upload -> Analysis user workflow is complete for current stage scope.
+
 ## Step Template (For Next Phases)
 
 ```md

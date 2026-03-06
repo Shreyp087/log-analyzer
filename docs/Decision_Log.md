@@ -656,3 +656,101 @@ Rationale:
 
 Result:
 - Upload UX is modular, typed, and integrated with backend summary/anomaly response shape.
+
+## Phase 11: Analysis Display
+
+Date: 2026-03-06
+
+## Decision 33: Render Stage 11 via dedicated dynamic analysis route
+
+Context:
+- Stage 11 required a full analysis screen after upload completion.
+
+Selected approach:
+- Added `frontend/app/analysis/[id]/page.tsx` as a protected route that loads cached upload analysis payload by upload ID and renders components in summary -> timeline -> anomalies -> findings order.
+
+Alternatives:
+1. Implement backend retrieval endpoint (`GET /uploads/{id}`) and fetch analysis on page load.
+   - Trade-off: Better long-term durability across sessions, but increases backend scope for this stage.
+
+Rationale:
+- Dynamic route plus cached payload provides immediate end-to-end Stage 11 behavior with minimal contract expansion.
+
+Result:
+- Analysis results are now accessible through a dedicated URL after upload.
+
+## Decision 34: Persist upload response in browser storage for route handoff
+
+Context:
+- Analysis page needed access to full upload response payload without adding new backend endpoints in this stage.
+
+Selected approach:
+- Updated upload UI to store response under `analysis_result_<upload_id>` and linked users to `/analysis/<upload_id>`.
+
+Alternatives:
+1. Pass payload only through React state/navigation.
+   - Trade-off: Simpler state flow but breaks on refresh and direct URL open.
+2. Use query-string encoded payload.
+   - Trade-off: Quick handoff, but URL bloat and poor security/readability.
+
+Rationale:
+- Local storage keying by upload ID balances simplicity with refresh resilience for the current architecture.
+
+Result:
+- Upload -> analysis navigation now works reliably within the current browser session.
+
+## Decision 35: Keep summary/timeline/anomalies/findings as separate components
+
+Context:
+- Stage 11 includes multiple presentation layers and clear section ordering.
+
+Selected approach:
+- Implemented `SummaryCards`, `TimelineTable`, `AnomaliesTable`, and `FindingsPanel` as standalone reusable components.
+
+Alternatives:
+1. Build one monolithic analysis page with inline sections.
+   - Trade-off: Fewer files initially, but weaker maintainability and harder targeted iteration/testing.
+
+Rationale:
+- Component separation keeps responsibility boundaries clear and preserves clean workflow progression for solo delivery.
+
+Result:
+- Analysis UI remains modular and easier to extend.
+
+## Decision 36: Add backend `events_preview` in upload response for timeline rendering
+
+Context:
+- Timeline display required event-level data, but full event retrieval route was not yet introduced.
+
+Selected approach:
+- Extended `POST /uploads` response to include capped `events_preview` list with serializable fields and ISO timestamps.
+
+Alternatives:
+1. Omit timeline data and show only summary/anomalies.
+   - Trade-off: Less backend change, but incomplete Stage 11 display requirements.
+2. Return all events with no cap.
+   - Trade-off: Easier implementation, but larger payloads and slower UI for large uploads.
+
+Rationale:
+- Capped preview payload delivers useful detail while keeping response size controlled.
+
+Result:
+- Frontend can render timeline context immediately after upload.
+
+## Decision 37: Add explicit analysis-specific CSS system
+
+Context:
+- Stage 11 introduced dense data tables and severity visualization not covered by prior shell styles.
+
+Selected approach:
+- Extended `frontend/app/globals.css` with analysis grid cards, table wrappers, truncation, severity chips, and responsive adjustments.
+
+Alternatives:
+1. Keep browser-default table styles.
+   - Trade-off: Minimal work, but weak readability and poor visual hierarchy.
+
+Rationale:
+- Structured styling improves legibility and keeps the analysis view presentation-ready.
+
+Result:
+- Stage 11 screens render clearly on desktop and mobile.

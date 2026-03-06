@@ -92,6 +92,21 @@ def upload_log_file():
         db.session.rollback()
         return jsonify({"error": "failed to process upload", "details": str(exc)}), 500
 
+    events_preview = []
+    for event in parsed_events[:200]:
+        event_time = event.get("event_time")
+        events_preview.append(
+            {
+                "event_time": event_time.isoformat() if event_time else None,
+                "username": event.get("username"),
+                "source_ip": event.get("source_ip"),
+                "destination": event.get("destination"),
+                "action": event.get("action"),
+                "category": event.get("category"),
+                "bytes_transferred": event.get("bytes_transferred"),
+            }
+        )
+
     return (
         jsonify(
             {
@@ -103,6 +118,7 @@ def upload_log_file():
                 "anomalies_detected": len(anomaly_models),
                 "parse_errors_count": len(parse_errors),
                 "parse_errors": parse_errors[:20],
+                "events_preview": events_preview,
                 "summary": {
                     "total_events": summary.total_events,
                     "total_anomalies": summary.total_anomalies,
