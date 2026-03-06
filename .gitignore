@@ -5,6 +5,7 @@ __pycache__/
 # Local environment files
 .env
 backend/.env
+backend/instance/
 
 # Virtual environments
 .venv/

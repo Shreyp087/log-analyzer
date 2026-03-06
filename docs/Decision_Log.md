@@ -157,3 +157,70 @@ Rationale:
 
 Result:
 - Config initialization is explicit, repeatable, and safer.
+
+## Phase 3: Data Model
+
+Date: 2026-03-06
+
+## Decision 9: Define schema before parser logic
+
+Context:
+- Stage 3 required parser/upload features to target stable DB tables.
+
+Selected approach:
+- Implement schema first in `backend/app/models.py` with:
+  - `User`
+  - `Upload`
+  - `Event`
+  - `Anomaly`
+  - optional `Summary`
+
+Alternatives:
+1. Parse first, persist later.
+   - Trade-off: Faster initial prototyping, but weaker architecture narrative and higher refactor risk.
+
+Rationale:
+- Schema-first keeps service and route interfaces aligned to a real persistence contract.
+
+Result:
+- Domain model is explicit and ready for parser/upload integration.
+
+## Decision 10: Generate migrations immediately after model definition
+
+Context:
+- Need versioned schema history as soon as initial models are in place.
+
+Selected approach:
+- Generated Flask-Migrate baseline and first migration revision from models.
+
+Alternatives:
+1. Delay migrations until parser/routes are implemented.
+   - Trade-off: Less setup now, but poor schema traceability and bigger migration deltas later.
+2. Use `db.create_all()` without Alembic revisions.
+   - Trade-off: Quick local setup, but no reliable upgrade path across environments.
+
+Rationale:
+- Early migration baseline keeps schema evolution auditable and team-safe.
+
+Result:
+- `backend/migrations` now contains an initial revision for all Stage 3 tables.
+
+## Decision 11: Use `psycopg[binary]` instead of `psycopg2-binary`
+
+Context:
+- Stage 3 validation exposed local Python compatibility issues with `psycopg2-binary`.
+
+Selected approach:
+- Switched database driver dependency to `psycopg[binary]==3.2.13`.
+
+Alternatives:
+1. Keep `psycopg2-binary` and require a different local Python toolchain.
+   - Trade-off: Keeps older driver line, but increases onboarding friction and install failures.
+2. Use source-built `psycopg2` with system `pg_config`.
+   - Trade-off: Works in controlled environments, but adds native build prerequisites.
+
+Rationale:
+- `psycopg[binary]` provides cleaner install behavior on modern Python while preserving PostgreSQL support.
+
+Result:
+- `pip install -r backend/requirements.txt` validated successfully in this environment.

@@ -103,7 +103,7 @@ Objective:
 - Define all packages needed for app boot, database integration, JWT, and migrations.
 
 Approach chosen:
-- Updated `backend/requirements.txt` with Flask, Flask-SQLAlchemy, Flask-Migrate, Flask-JWT-Extended, `psycopg2-binary`, and `python-dotenv`.
+- Updated `backend/requirements.txt` with Flask, Flask-SQLAlchemy, Flask-Migrate, Flask-JWT-Extended, `psycopg[binary]`, and `python-dotenv`.
 
 Alternative considered:
 1. Keep only Flask and add packages later.
@@ -214,6 +214,67 @@ Validation:
 
 Outcome:
 - Backend shell is structured, modular, and ready for parser/upload logic next.
+
+## Phase 3: Data Model
+
+Date: 2026-03-06
+
+### Step 9: Define application schema in `backend/app/models.py`
+
+Objective:
+- Create concrete persistence targets before parser and upload logic.
+
+Approach chosen:
+- Added `User`, `Upload`, `Event`, `Anomaly`, and optional `Summary` models in `backend/app/models.py`.
+- Added foreign keys and relationships to reflect expected flow:
+  - user -> uploads
+  - upload -> events/anomalies/summary
+  - event -> anomalies
+- Updated app factory to import models before migration autogeneration.
+
+Alternative considered:
+1. Parse first and persist later.
+
+Trade-off:
+- Good for rapid prototyping, but creates weak schema planning and usually causes rework in routes/services.
+
+Why this choice:
+- Schema-first gives parser/routes a stable contract and improves architecture consistency.
+
+Validation:
+- Ran `python -m compileall backend` after model addition.
+
+Outcome:
+- Core domain entities now exist with a database-backed structure.
+
+### Step 10: Generate migration artifacts after models exist
+
+Objective:
+- Create versioned schema history from defined models.
+
+Approach chosen:
+- Generated Flask-Migrate scaffolding and initial migration:
+  - `python -m flask --app run.py db init`
+  - `python -m flask --app run.py db migrate -m "create stage3 core tables"`
+- Used temporary `DATABASE_URL=sqlite:///stage3_dev.db` for autogeneration in local environment.
+
+Alternative considered:
+1. Skip migrations and use `db.create_all()`.
+
+Trade-off:
+- Faster setup, but weaker production path and no versioned schema history.
+
+Why this choice:
+- Migrations create a reproducible, reviewable schema evolution path.
+
+Validation:
+- Confirmed generated file `backend/migrations/versions/97b56d461f28_create_stage3_core_tables.py` contains all Stage 3 tables and indexes.
+- During validation, `psycopg2-binary` proved incompatible with this local Python runtime, so dependency was updated to `psycopg[binary]==3.2.13` and installation was re-validated successfully.
+- Ran `python -m flask --app run.py db upgrade` against temporary SQLite URL to verify migration application end-to-end.
+- Ran `python -m flask --app run.py db current` and confirmed head revision `97b56d461f28`.
+
+Outcome:
+- Initial migration baseline is now present and ready for `db upgrade`.
 
 ## Step Template (For Next Phases)
 

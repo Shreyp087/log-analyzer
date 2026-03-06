@@ -4,7 +4,7 @@
 
 Log Analyzer ingests network and security logs, parses key fields, detects anomalies, and prepares summary outputs for analyst review.
 
-Current scope includes Stage 1 foundation and Stage 2 backend shell bootstrapping.
+Current scope includes Stage 1 foundation, Stage 2 backend shell bootstrapping, and Stage 3 data model + migrations.
 
 ## Chosen Stack
 
@@ -39,7 +39,9 @@ TBD in Phase 2.
    - `Copy-Item .env.example .env` (PowerShell)
 2. Install dependencies:
    - `pip install -r requirements.txt`
-3. Start app:
+3. Run migrations:
+   - `python -m flask --app run.py db upgrade`
+4. Start app:
    - `python run.py`
 
 ### Frontend Setup
@@ -52,10 +54,11 @@ TBD in Phase 2.
 - [x] Stage 1: PostgreSQL-only `docker-compose.yml`
 - [x] Stage 1: canonical sample log (`sample_logs/sample_zscaler.log`)
 - [x] Stage 2: backend shell (`run.py`, app factory, config, env template)
-- [ ] Stage 3: parser implementation against sample logs
-- [ ] Stage 4: anomaly detection module
-- [ ] Stage 5: summarization pipeline
-- [ ] Stage 6: API and frontend integration
+- [x] Stage 3: data model + initial migrations
+- [ ] Stage 4: parser implementation against sample logs
+- [ ] Stage 5: anomaly detection module
+- [ ] Stage 6: summarization pipeline
+- [ ] Stage 7: API and frontend integration
 
 ## Documentation Workflow
 
