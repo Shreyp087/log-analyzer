@@ -754,3 +754,81 @@ Rationale:
 
 Result:
 - Stage 11 screens render clearly on desktop and mobile.
+
+## Auth Enhancement: Register Flow Completion
+
+Date: 2026-03-06
+
+## Decision 38: Add backend CORS support for direct frontend auth calls
+
+Context:
+- Auth endpoints were implemented, but browser-based cross-origin calls from frontend required explicit CORS handling.
+
+Selected approach:
+- Added `Flask-Cors` integration in app factory and configured allowed origins via `CORS_ORIGINS` environment variable.
+
+Alternatives:
+1. Keep backend without CORS and use server-side proxy only.
+   - Trade-off: Avoids backend CORS config, but couples frontend implementation and complicates local troubleshooting.
+
+Rationale:
+- Native API access from frontend is simpler for this project structure and keeps auth flow transparent.
+
+Result:
+- Browser auth requests can execute reliably against backend API.
+
+## Decision 39: Strengthen auth validation for register/login input
+
+Context:
+- Signup/login feedback should fail early with clear user-facing errors.
+
+Selected approach:
+- Added email format validation in both register and login routes while preserving existing password length checks.
+
+Alternatives:
+1. Keep only "field required" and credential mismatch checks.
+   - Trade-off: Less code, but lower input quality and more ambiguous user feedback.
+
+Rationale:
+- Explicit validation improves UX and reduces invalid auth attempts reaching credential checks.
+
+Result:
+- Auth endpoints now return cleaner, more specific validation errors.
+
+## Decision 40: Build dedicated register page + reusable form component
+
+Context:
+- Frontend had login only, which forced manual API registration and broke UX expectations.
+
+Selected approach:
+- Added `frontend/app/register/page.tsx` and `frontend/components/RegisterForm.tsx` with confirm-password guard and post-register session bootstrap.
+
+Alternatives:
+1. Keep registration API-only and document curl commands.
+   - Trade-off: Minimal UI work, but poor usability for normal product flow.
+2. Combine login and register in one form component/page.
+   - Trade-off: Fewer routes, but more state complexity and less clear UX.
+
+Rationale:
+- Separate register route keeps intent clear and matches common authentication patterns.
+
+Result:
+- Users can sign up directly from UI without command-line steps.
+
+## Decision 41: Improve auth discoverability with explicit navigation links
+
+Context:
+- New register route must be discoverable from existing entry points.
+
+Selected approach:
+- Added links from login page and home page to register flow.
+
+Alternatives:
+1. Keep register route unlinked and rely on direct route knowledge.
+   - Trade-off: Cleaner UI, but higher onboarding friction.
+
+Rationale:
+- Clear entry points reduce confusion and improve first-run success.
+
+Result:
+- Auth journey is now fully navigable for first-time users.

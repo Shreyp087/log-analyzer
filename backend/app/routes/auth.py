@@ -1,3 +1,5 @@
+import re
+
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy import select
@@ -7,6 +9,7 @@ from app.models import User
 from app.utils.security import hash_password, verify_password
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 @auth_bp.post("/register")
@@ -17,6 +20,8 @@ def register():
 
     if not email or not password:
         return jsonify({"error": "email and password are required"}), 400
+    if not EMAIL_PATTERN.match(email):
+        return jsonify({"error": "invalid email format"}), 400
 
     if len(password) < 8:
         return jsonify({"error": "password must be at least 8 characters"}), 400
@@ -50,6 +55,8 @@ def login():
 
     if not email or not password:
         return jsonify({"error": "email and password are required"}), 400
+    if not EMAIL_PATTERN.match(email):
+        return jsonify({"error": "invalid email format"}), 400
 
     user = db.session.scalar(select(User).where(User.email == email))
     if not user or not verify_password(password, user.password_hash):

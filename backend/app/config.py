@@ -14,6 +14,11 @@ class BaseConfig:
         "DATABASE_URL",
         "postgresql://log_user:log_password@localhost:5432/log_analyzer",
     )
+    CORS_ORIGINS = [
+        origin.strip()
+        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+        if origin.strip()
+    ]
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
     APP_PORT = int(os.getenv("APP_PORT", "8000"))

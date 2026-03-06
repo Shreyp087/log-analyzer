@@ -1100,6 +1100,83 @@ Validation:
 Outcome:
 - Upload -> Analysis user workflow is complete for current stage scope.
 
+## Auth Enhancement: Register Flow Completion
+
+Date: 2026-03-06
+
+### Step 40: Enable backend browser compatibility and stricter auth payload validation
+
+Objective:
+- Ensure frontend can call register/login endpoints directly and return clear validation errors.
+
+Approach chosen:
+- Added CORS support in app factory with env-configured allowed origins.
+- Added `CORS_ORIGINS` to backend env template/config.
+- Hardened auth validation with explicit email format checks in register and login handlers.
+
+Alternative considered:
+1. Keep backend unchanged and only build frontend register form.
+
+Trade-off:
+- Faster frontend-only change, but browser requests can fail cross-origin and error semantics stay weaker.
+
+Why this choice:
+- Signup flow should be reliable end-to-end, not only from API tools.
+
+Validation:
+- Backend module compile check completed after auth/config updates.
+
+Outcome:
+- Backend now supports direct browser auth calls with clearer validation behavior.
+
+### Step 41: Add dedicated frontend registration route and form
+
+Objective:
+- Provide a first-class signup experience rather than CLI-only registration.
+
+Approach chosen:
+- Added `frontend/app/register/page.tsx` and reusable `frontend/components/RegisterForm.tsx`.
+- Implemented form with confirm-password check, API submission, feedback messages, and auto-login session set on success.
+
+Alternative considered:
+1. Add registration fields directly to login page.
+
+Trade-off:
+- Single page is faster to wire, but increases UI complexity and reduces clarity for separate auth intents.
+
+Why this choice:
+- Separate register route keeps auth UX explicit and easier to maintain.
+
+Validation:
+- Frontend lint/build checks confirm route and component compile successfully.
+
+Outcome:
+- Users can now create accounts directly in UI and continue to dashboard flow.
+
+### Step 42: Connect auth navigation links for clean workflow
+
+Objective:
+- Remove dead ends and ensure user can navigate naturally between auth actions.
+
+Approach chosen:
+- Updated login page footer to point to register page.
+- Added register action link on home page hero.
+
+Alternative considered:
+1. Keep register route hidden and rely on direct URL access.
+
+Trade-off:
+- Less visual clutter, but weaker discoverability and higher onboarding friction.
+
+Why this choice:
+- Auth UX should be discoverable for new users without extra instructions.
+
+Validation:
+- Checked route links in app pages and verified navigation paths exist.
+
+Outcome:
+- Auth journey is now complete: Home -> Register/Login -> Dashboard.
+
 ## Step Template (For Next Phases)
 
 ```md
