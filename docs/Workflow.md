@@ -873,6 +873,88 @@ Validation:
 Outcome:
 - Frontend auth flow is functional and modular.
 
+## Phase 10: Upload UI
+
+Date: 2026-03-06
+
+### Step 32: Add dashboard route in `frontend/app/dashboard/page.tsx`
+
+Objective:
+- Provide authenticated landing area after login with clear action routing.
+
+Approach chosen:
+- Added client-side dashboard page that:
+  - validates auth session
+  - fetches current user from `/auth/me`
+  - exposes primary actions (go to upload, logout)
+
+Alternative considered:
+1. Redirect login directly to upload page without dashboard.
+
+Trade-off:
+- Faster path to action, but weaker navigation hub for future workflows.
+
+Why this choice:
+- Dashboard acts as stable post-login landing and organizes next user actions.
+
+Validation:
+- Confirmed login now redirects to `/dashboard` and page enforces session presence.
+
+Outcome:
+- Authenticated users now land in a dedicated workflow entry point.
+
+### Step 33: Add upload page in `frontend/app/upload/page.tsx`
+
+Objective:
+- Build first primary user workflow after authentication.
+
+Approach chosen:
+- Added protected upload page with context text and back-navigation to dashboard.
+- Page hosts reusable upload interaction component.
+
+Alternative considered:
+1. Trigger upload inside dashboard card only.
+
+Trade-off:
+- Fewer routes, but cramped interaction space and weaker separation of concerns.
+
+Why this choice:
+- Dedicated upload page keeps workflow focused and scalable for future analysis UI.
+
+Validation:
+- Confirmed `/upload` route is generated in Next.js build output.
+
+Outcome:
+- Upload workflow now has a dedicated UI surface.
+
+### Step 34: Add upload interaction component in `frontend/components/UploadDropzone.tsx`
+
+Objective:
+- Provide reusable file upload experience connected to backend `/uploads`.
+
+Approach chosen:
+- Added dropzone component with:
+  - drag-and-drop + file picker input
+  - upload action via `uploadLogFile()`
+  - progress/error state
+  - summary/anomaly result preview
+
+Alternative considered:
+1. Place all upload logic directly inside upload page.
+
+Trade-off:
+- Faster first page implementation, but harder reuse and larger page complexity.
+
+Why this choice:
+- Reusable upload component supports modular UI and future embedding.
+
+Validation:
+- Ran frontend lint and build successfully.
+- Verified Next build output includes `/dashboard` and `/upload` static routes.
+
+Outcome:
+- First full authenticated user workflow (login -> dashboard -> upload) is now implemented.
+
 ## Step Template (For Next Phases)
 
 ```md

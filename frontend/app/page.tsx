@@ -10,7 +10,8 @@ const stageItems = [
   { stage: "Stage 7", status: "Done", label: "Anomaly detection" },
   { stage: "Stage 8", status: "Done", label: "Frontend shell" },
   { stage: "Stage 9", status: "Done", label: "Frontend auth layer" },
-  { stage: "Stage 10", status: "Pending", label: "API/frontend integration" }
+  { stage: "Stage 10", status: "Done", label: "Frontend upload workflow" },
+  { stage: "Stage 11", status: "Pending", label: "API/frontend integration polish" }
 ];
 
 const backendContracts = [
@@ -36,6 +37,9 @@ export default function HomePage() {
         <div className="hero-actions">
           <Link href="/login" className="btn-secondary">
             Open Login Flow
+          </Link>
+          <Link href="/dashboard" className="btn-secondary">
+            Open Dashboard
           </Link>
         </div>
       </section>

@@ -596,3 +596,63 @@ Rationale:
 
 Result:
 - Login flow is modular and easier to evolve.
+
+## Phase 10: Upload UI
+
+Date: 2026-03-06
+
+## Decision 30: Implement upload UI immediately after frontend auth layer
+
+Context:
+- Stage 10 defines first main authenticated user action in frontend.
+
+Selected approach:
+- Built upload workflow only after Stage 9 login/session flow was stable.
+
+Alternatives:
+1. Build upload UI before login flow.
+   - Trade-off: Faster visible feature, but broken protected workflow and likely rework.
+
+Rationale:
+- Upload is meaningful only inside authenticated session constraints.
+
+Result:
+- UI now follows coherent flow: login -> dashboard -> upload.
+
+## Decision 31: Add dedicated dashboard and upload routes
+
+Context:
+- Need clear post-login landing plus focused upload workspace.
+
+Selected approach:
+- Added:
+  - `frontend/app/dashboard/page.tsx`
+  - `frontend/app/upload/page.tsx`
+
+Alternatives:
+1. Single-page flow combining dashboard + upload.
+   - Trade-off: Fewer routes, but lower clarity and reduced extensibility.
+
+Rationale:
+- Route separation keeps navigation clear and scales better as workflows expand.
+
+Result:
+- Frontend has structured authenticated navigation.
+
+## Decision 32: Use reusable dropzone component for upload interaction
+
+Context:
+- Upload interaction includes file selection, drag/drop, API state handling, and result rendering.
+
+Selected approach:
+- Added `frontend/components/UploadDropzone.tsx` and integrated with typed upload API helper.
+
+Alternatives:
+1. Keep upload logic inline in upload page.
+   - Trade-off: Less upfront abstraction, but larger page complexity and weaker reuse.
+
+Rationale:
+- Dedicated component keeps page simple and supports future reuse.
+
+Result:
+- Upload UX is modular, typed, and integrated with backend summary/anomaly response shape.

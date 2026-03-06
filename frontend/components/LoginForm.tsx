@@ -32,7 +32,7 @@ export default function LoginForm() {
       const response = await loginUser(form);
       setAuthSession(response.access_token, response.user);
       setFeedback({ type: "success", message: `Logged in as ${response.user.email}` });
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch (error) {
       clearAuthSession();
