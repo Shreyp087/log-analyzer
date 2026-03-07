@@ -16,7 +16,9 @@ class BaseConfig:
     )
     CORS_ORIGINS = [
         origin.strip()
-        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+        for origin in os.getenv(
+            "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+        ).split(",")
         if origin.strip()
     ]
     SQLALCHEMY_TRACK_MODIFICATIONS = False

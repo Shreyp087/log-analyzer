@@ -9,7 +9,7 @@ import type {
   UploadResponse
 } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 
 export class ApiRequestError extends Error {
   status: number;
@@ -81,11 +81,15 @@ export async function apiRequest<T>(
 }
 
 export function loginUser(payload: LoginRequest): Promise<LoginResponse> {
-  return apiRequest<LoginResponse>("/auth/login", { method: "POST", body: payload, token: null });
+  return apiRequest<LoginResponse>("/api/auth/login", {
+    method: "POST",
+    body: payload,
+    token: null
+  });
 }
 
 export function registerUser(payload: RegisterRequest): Promise<RegisterResponse> {
-  return apiRequest<RegisterResponse>("/auth/register", {
+  return apiRequest<RegisterResponse>("/api/auth/register", {
     method: "POST",
     body: payload,
     token: null
@@ -93,7 +97,7 @@ export function registerUser(payload: RegisterRequest): Promise<RegisterResponse
 }
 
 export function fetchCurrentUser(token?: string): Promise<AuthenticatedUser> {
-  return apiRequest<AuthenticatedUser>("/auth/me", { method: "GET", token });
+  return apiRequest<AuthenticatedUser>("/api/auth/me", { method: "GET", token });
 }
 
 export function uploadLogFile(file: File, source = "zscaler"): Promise<UploadResponse> {

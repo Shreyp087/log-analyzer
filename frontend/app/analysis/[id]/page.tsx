@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import AnalysisCharts from "@/components/AnalysisCharts";
 import AnomaliesTable from "@/components/AnomaliesTable";
+import ExecutiveSummaryPanel from "@/components/ExecutiveSummaryPanel";
 import FindingsPanel from "@/components/FindingsPanel";
 import SummaryCards from "@/components/SummaryCards";
 import TimelineTable from "@/components/TimelineTable";
-import { getAuthSession } from "@/lib/auth";
+import { getAuthToken } from "@/lib/auth";
 import type { UploadResponse } from "@/types";
 
 function storageKey(uploadId: string): string {
@@ -34,6 +36,7 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [result, setResult] = useState<UploadResponse | null>(null);
+  const [activeLines, setActiveLines] = useState<number[]>([]);
 
   const uploadId = useMemo(() => {
     const value = params?.id;
@@ -42,9 +45,9 @@ export default function AnalysisPage() {
   }, [params]);
 
   useEffect(() => {
-    const session = getAuthSession();
-    if (!session) {
-      router.replace("/login");
+    const token = getAuthToken();
+    if (!token) {
+      router.replace("/");
       return;
     }
 
@@ -67,6 +70,24 @@ export default function AnalysisPage() {
     setLoading(false);
   }, [router, uploadId]);
 
+  useEffect(() => {
+    if (!activeLines.length) return;
+    const firstLine = activeLines[0];
+    const row = document.getElementById(`event-row-${firstLine}`);
+    if (row) {
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [activeLines]);
+
+  const onSelectLines = useCallback((lines: number[]) => {
+    if (!lines.length) return;
+    setActiveLines(lines);
+  }, []);
+
+  const onSelectLine = useCallback((lineNumber: number) => {
+    setActiveLines([lineNumber]);
+  }, []);
+
   if (loading) {
     return (
       <main className="shell">
@@ -81,7 +102,7 @@ export default function AnalysisPage() {
     return (
       <main className="shell">
         <section className="hero">
-          <p className="chip">Stage 11</p>
+          <p className="chip">Analysis</p>
           <h1>Analysis Unavailable</h1>
           <p className="subtext">{error || "No analysis data available."}</p>
           <div className="hero-actions">
@@ -100,7 +121,7 @@ export default function AnalysisPage() {
   return (
     <main className="shell">
       <section className="hero">
-        <p className="chip">Stage 11</p>
+        <p className="chip">Analysis</p>
         <h1>Analysis #{result.upload_id}</h1>
         <p className="subtext">
           Uploaded file <code>{result.filename}</code> with status <code>{result.status}</code>.
@@ -116,8 +137,19 @@ export default function AnalysisPage() {
       </section>
 
       <SummaryCards result={result} />
-      <TimelineTable events={result.events_preview} />
-      <AnomaliesTable anomalies={result.anomalies} />
+      <ExecutiveSummaryPanel result={result} />
+      <AnalysisCharts events={result.events_preview} summary={result.summary} />
+      <TimelineTable
+        events={result.events_preview}
+        anomalies={result.anomalies}
+        activeLines={activeLines}
+        onSelectLine={onSelectLine}
+      />
+      <AnomaliesTable
+        anomalies={result.anomalies}
+        activeLines={activeLines}
+        onSelectLines={onSelectLines}
+      />
       <FindingsPanel result={result} />
     </main>
   );

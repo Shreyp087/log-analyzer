@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { fetchCurrentUser } from "@/lib/api";
-import { clearAuthSession, getAuthSession } from "@/lib/auth";
+import { clearAuthSession, getAuthToken, setAuthSession } from "@/lib/auth";
 import type { AuthenticatedUser } from "@/types";
 
 export default function DashboardPage() {
@@ -15,20 +15,21 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const session = getAuthSession();
-    if (!session) {
-      router.replace("/login");
+    const token = getAuthToken();
+    if (!token) {
+      router.replace("/");
       return;
     }
 
-    fetchCurrentUser(session.token)
+    fetchCurrentUser(token)
       .then((currentUser) => {
+        setAuthSession(token, currentUser);
         setUser(currentUser);
       })
       .catch(() => {
         clearAuthSession();
         setError("Session expired. Please login again.");
-        router.replace("/login");
+        router.replace("/");
       })
       .finally(() => setLoading(false));
   }, [router]);
@@ -46,11 +47,11 @@ export default function DashboardPage() {
   return (
     <main className="shell">
       <section className="hero">
-        <p className="chip">Stage 10</p>
+        <p className="chip">Operations</p>
         <h1>Dashboard</h1>
         {user ? (
           <p className="subtext">
-            Logged in as <strong>{user.email}</strong> ({user.role}).
+            Logged in as <strong>{user.name}</strong> (<code>{user.username}</code>, {user.role}).
           </p>
         ) : (
           <p className="subtext">Authenticated workspace for upload and analysis actions.</p>
@@ -79,7 +80,7 @@ export default function DashboardPage() {
               className="btn-secondary"
               onClick={() => {
                 clearAuthSession();
-                router.push("/login");
+                router.push("/");
               }}
             >
               Logout

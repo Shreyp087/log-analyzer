@@ -1,9 +1,15 @@
-from werkzeug.security import check_password_hash, generate_password_hash
+BCRYPT_ROUNDS = 12
+
+import bcrypt
 
 
 def hash_password(password: str) -> str:
-    return generate_password_hash(password)
+    salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return check_password_hash(password_hash, password)
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    except ValueError:
+        return False

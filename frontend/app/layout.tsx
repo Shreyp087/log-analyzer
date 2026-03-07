@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 import type { ReactNode } from "react";
 
 import "./globals.css";
@@ -24,7 +25,31 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${heading.variable} ${mono.variable}`}>{children}</body>
+      <body className={`${heading.variable} ${mono.variable}`}>
+        <Script id="root-auth-redirect" strategy="beforeInteractive">
+          {`
+            (function () {
+              try {
+                if (window.location.pathname !== "/") return;
+                var token = localStorage.getItem("log_analyzer_access_token");
+                if (!token) return;
+                var cookieName = "log_analyzer_access_token=";
+                var hasCookie = document.cookie.split("; ").some(function (chunk) {
+                  return chunk.indexOf(cookieName) === 0;
+                });
+                if (!hasCookie) {
+                  document.cookie =
+                    "log_analyzer_access_token=" +
+                    encodeURIComponent(token) +
+                    "; Path=/; Max-Age=604800; SameSite=Lax";
+                }
+                window.location.replace("/dashboard");
+              } catch (_err) {}
+            })();
+          `}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }
