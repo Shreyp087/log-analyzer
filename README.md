@@ -46,7 +46,26 @@ Current implementation includes:
 - Python 3.11+ with `venv`
 - Node.js 18+ and npm
 
-### 1. Start PostgreSQL
+### One-command Docker run (frontend + backend + postgres)
+
+From repository root:
+
+```powershell
+docker compose up --build
+```
+
+Services:
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8000`
+- PostgreSQL: `localhost:5432`
+
+Notes:
+- Backend runs migrations automatically on container start (`flask db upgrade`).
+- `backend/.env` is loaded in the backend container (for keys like `OPENAI_API_KEY`).
+
+### Manual local run (without Docker for app services)
+
+#### 1. Start PostgreSQL
 
 From repository root:
 
@@ -54,7 +73,7 @@ From repository root:
 docker compose up -d postgres
 ```
 
-### 2. Configure and Run Backend
+#### 2. Configure and Run Backend
 
 ```powershell
 cd backend
@@ -66,10 +85,9 @@ python -m flask --app run.py db upgrade
 python run.py
 ```
 
-Backend base URL: `http://localhost:8000`  
-Health check: `GET http://localhost:8000/health`
+Backend base URL: `http://127.0.0.1:8000`
 
-### 3. Configure and Run Frontend
+#### 3. Configure and Run Frontend
 
 In a separate terminal:
 
@@ -77,19 +95,16 @@ In a separate terminal:
 cd frontend
 npm install
 @"
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 "@ | Set-Content .env.local
 npm run dev
 ```
 
+Use `http://127.0.0.1:8000` instead of `localhost` to avoid Windows IPv6 loopback conflicts where another service can intercept `localhost:8000`.
+
 Frontend URL: `http://localhost:3000`
 
 ## API Endpoints
-
-### Health
-
-- `GET /health`  
-Returns service readiness.
 
 ### Auth
 
@@ -139,17 +154,45 @@ Each anomaly includes:
 - `confidence` (0-1)
 - `severity` derived from confidence
 
-## Where AI Is Used
+## AI & Detection Methodology
 
-Current runtime behavior in this repo is deterministic and does **not** require an external LLM call to function.
+### OpenAI Executive Summary
+- Endpoint: `POST https://api.openai.com/v1/chat/completions`
+- Model: `gpt-4o-mini` with `response_format: { type: "json_object" }`
+- Generation controls: `temperature: 0.2` for consistent factual output
+- Prompt input (structured): `{ totalEvents, blockedCount, blockRate, anomalies[], topSourceIPs[], topCategories[], threatsDetected }`
+- Returned JSON: `{ riskLevel, executiveSummary, keyFindings[], recommendations[], immediateActions[] }`
+- Failure handling: if API key is missing, rate-limited, or request fails, backend uses a deterministic fallback that returns the **same JSON shape**.
+- Estimated cost: `~$0.0002` per analysis (negligible for this scope)
 
-AI is used in this project in two ways:
+> Fallback risk is derived from blockRate thresholds and anomaly severity counts, so UI rendering is identical whether OpenAI is available or not.
 
-1. Development acceleration
-- Assisted scaffold/code generation and documentation drafting.
+### Statistical / Algorithmic Detection (Non-LLM)
+- Z-score formula: `z = (x - mu) / sigma` on normalized aggregates (per-IP frequency, outbound volume).
+- Temporal burst logic: sliding 60s windows compare current request burst vs entity baseline.
+- Volume baseline: compares outbound bytes vs peer-group baseline to detect exfiltration outliers.
+- Alerting uses these methods because they are deterministic, auditable, and non-hallucinatory.
 
-2. Extension point (future)
-- The summary/findings layer can be upgraded with LLM-generated narrative explanations, but this is not mandatory for current execution.
+| Algorithm | Method | Detects | Example |
+|---|---|---|---|
+| Z-Score Frequency | Statistical (μ, σ on per-IP counts) | Brute force, DoS | 11 POST /login in 11 seconds from 10.0.0.5 |
+| Temporal Burst | Sliding 60s window, max burst count | Credential stuffing | 6 requests/minute vs baseline of 1 |
+| Volume Baseline | Z-score on outbound bytes per entity | Data exfiltration | 70MB sent to Dropbox vs 2KB group mean |
+| Threat Signature | Keyword + category field matching | Known malware/C2/phishing | action=ALLOW, category=Malware, url=c2.* |
+| Policy Violation | Per-entity BLOCK event frequency | Insider threat, bypass | 3 blocked requests across Malware + Phishing |
+| Destination Fan-out | Unique dest IP count per source IP | Lateral movement, scanning | 1 IP contacting 6 unique destinations |
+
+### Confidence Score Methodology
+- Scores are computed from explicit signals (action, category risk, byte volume, destination indicators, temporal deviation), not arbitrary constants.
+- Each detector has bounded boosts/penalties and severity mapping thresholds.
+- Confidence is capped to avoid overstatement from one strong signal.
+
+### Limitations (Current Dataset Size)
+- Small samples reduce z-score reliability.
+- Benign batch jobs can mimic burst/exfil patterns.
+- Sparse category labels reduce signature precision.
+
+> "LLMs are non-deterministic and cannot be audited — a SOC analyst must be able to explain exactly why an alert fired. Statistical methods produce reproducible results with mathematical justification. OpenAI gpt-4o-mini is used exclusively for natural language synthesis of already-structured findings, where its strength (fluent prose) outweighs its weakness (non-determinism)."
 
 ## Sample Credentials
 

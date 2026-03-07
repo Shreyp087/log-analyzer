@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import uuid4
 
 from app import db
 
@@ -7,9 +8,14 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(
+        db.String(36), unique=True, nullable=False, index=True, default=lambda: str(uuid4())
+    )
+    username = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    full_name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(50), nullable=False, default="analyst")
+    role = db.Column(db.String(50), nullable=False, default="SOC Analyst")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     uploads = db.relationship(

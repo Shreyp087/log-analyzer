@@ -5,28 +5,32 @@ export interface ApiErrorPayload {
 }
 
 export interface AuthenticatedUser {
-  id: number;
-  email: string;
+  id: string;
+  username: string;
+  name: string;
   role: string;
 }
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
 export interface LoginResponse {
+  token: string;
   access_token: string;
   user: AuthenticatedUser;
 }
 
 export interface RegisterRequest {
-  email: string;
+  name: string;
+  username: string;
   password: string;
+  role: "SOC Analyst" | "Security Admin" | "Threat Hunter" | "IR Analyst";
 }
 
 export interface RegisterResponse {
-  message: string;
+  token: string;
   access_token: string;
   user: AuthenticatedUser;
 }
@@ -52,12 +56,25 @@ export interface UploadSummaryPayload {
   top_source_ips: CountValuePair[];
 }
 
+export interface AiExecutiveSummaryPayload {
+  riskLevel: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | string;
+  executiveSummary: string;
+  keyFindings: string[];
+  recommendations: string[];
+  immediateActions: string[];
+}
+
 export interface UploadAnomalyPayload {
-  event_id: number;
-  anomaly_type: string;
+  event_row?: number;
+  event_id?: number;
+  anomaly_type?: string;
+  type?: string;
   severity: string;
   confidence: number;
-  description: string;
+  description?: string;
+  explanation?: string;
+  affectedLines?: number[];
+  detectionMethod?: string;
 }
 
 export interface UploadParseErrorPayload {
@@ -67,6 +84,15 @@ export interface UploadParseErrorPayload {
 }
 
 export interface UploadEventPreview {
+  lineNumber?: number;
+  raw?: string | null;
+  sourceIp?: string | null;
+  user?: string | null;
+  url?: string | null;
+  threat?: string | null;
+  severity?: string | null;
+  isAnomalous?: boolean;
+  anomalies?: UploadAnomalyPayload[];
   event_time: string | null;
   username: string | null;
   source_ip: string | null;
@@ -85,7 +111,9 @@ export interface UploadResponse {
   anomalies_detected: number;
   parse_errors_count: number;
   parse_errors: UploadParseErrorPayload[];
+  detection_notes?: string[];
   events_preview: UploadEventPreview[];
   summary: UploadSummaryPayload;
+  ai_summary?: AiExecutiveSummaryPayload;
   anomalies: UploadAnomalyPayload[];
 }
