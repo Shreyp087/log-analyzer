@@ -76,6 +76,7 @@ export interface DetectionNotesSummaryPayload {
 }
 
 export interface UploadAnomalyPayload {
+  aiEnrichmentStatus?: "enriched" | "eligible" | "not_applicable" | string;
   aiEnrichment?: {
     attackPattern: string;
     mitreId: string;

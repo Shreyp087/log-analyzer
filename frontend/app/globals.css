@@ -721,6 +721,19 @@ code {
   border: 1px solid rgba(0, 212, 255, 0.35);
 }
 
+.ai-eligible-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.13rem 0.45rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(255, 184, 0, 0.16);
+  color: #7e5a00;
+  border: 1px solid rgba(255, 184, 0, 0.36);
+}
+
 .anomaly-expand-btn {
   margin-top: 0.35rem;
   border: 0;

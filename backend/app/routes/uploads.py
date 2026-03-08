@@ -212,6 +212,8 @@ def upload_log_file():
 
     anomaly_response_payload = []
     for anomaly_index, item in enumerate(anomaly_response_items[:20]):
+        severity_upper = (item["anomaly"].severity or "").upper()
+        is_ai_eligible = severity_upper in {"HIGH", "CRITICAL"}
         payload = {
             "event_row": item["event_row"],
             "affectedLines": item["affected_lines"],
@@ -223,10 +225,12 @@ def upload_log_file():
             "confidence": item["anomaly"].score,
             "explanation": item["anomaly"].description,
             "description": item["anomaly"].description,
+            "aiEnrichmentStatus": "eligible" if is_ai_eligible else "not_applicable",
         }
         ai_enrichment = enrichment_by_index.get(anomaly_index)
         if ai_enrichment:
             payload["aiEnrichment"] = ai_enrichment
+            payload["aiEnrichmentStatus"] = "enriched"
         anomaly_response_payload.append(payload)
 
     return (
