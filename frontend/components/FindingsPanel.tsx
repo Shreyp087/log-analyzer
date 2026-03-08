@@ -15,6 +15,7 @@ function topValueOrFallback(
 export default function FindingsPanel({ result }: FindingsPanelProps) {
   const findings: string[] = [];
   const { summary } = result;
+  const detectionNotes = result.detection_notes || [];
 
   findings.push(`Upload status: ${result.status.replaceAll("_", " ")}`);
   findings.push(
@@ -44,6 +45,18 @@ export default function FindingsPanel({ result }: FindingsPanelProps) {
           <li key={finding}>{finding}</li>
         ))}
       </ul>
+      <div className="detection-notes-section">
+        <h3>Detection Notes</h3>
+        {detectionNotes.length > 0 ? (
+          <ul className="detection-notes-list">
+            {detectionNotes.map((note, index) => (
+              <li key={`detection-note-${index}`}>{note}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted">No detection notes for this upload.</p>
+        )}
+      </div>
     </aside>
   );
 }
