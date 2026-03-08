@@ -7,13 +7,22 @@ load_dotenv()
 BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
+def _normalize_database_url(raw_url: str) -> str:
+    # Render and many providers expose Postgres URLs as postgresql://.
+    # SQLAlchemy then defaults to psycopg2. We use psycopg v3.
+    if raw_url.startswith("postgresql://"):
+        return raw_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return raw_url
+
+
+DEFAULT_DATABASE_URL = "postgresql+psycopg://log_user:log_password@localhost:5432/log_analyzer"
+DATABASE_URL = _normalize_database_url(os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL))
+
+
 class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me-at-least-32")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret-key-change-me-at-least-32")
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        "postgresql://log_user:log_password@localhost:5432/log_analyzer",
-    )
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
     CORS_ORIGINS = [
         origin.strip()
         for origin in os.getenv(
