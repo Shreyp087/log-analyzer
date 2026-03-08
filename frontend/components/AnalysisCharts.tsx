@@ -37,19 +37,37 @@ function eventTimestamp(event: UploadEventPreview): string | null {
 }
 
 export default function AnalysisCharts({ events, summary }: AnalysisChartsProps) {
-  const hourlyData = useMemo(() => {
-    const hours = Array.from({ length: 24 }, (_, hour) => ({ hour, count: 0 }));
-    for (const event of events) {
-      const timestamp = eventTimestamp(event);
-      if (!timestamp) continue;
-      const parsed = new Date(timestamp);
-      if (Number.isNaN(parsed.getTime())) continue;
-      const hour = parsed.getUTCHours();
-      if (hour >= 0 && hour <= 23) {
-        hours[hour].count += 1;
-      }
+  const timelineData = useMemo(() => {
+    const parsedTimes = events
+      .map((event) => eventTimestamp(event))
+      .filter((timestamp): timestamp is string => Boolean(timestamp))
+      .map((timestamp) => new Date(timestamp))
+      .filter((date) => !Number.isNaN(date.getTime()))
+      .map((date) => date.getTime())
+      .sort((a, b) => a - b);
+
+    if (parsedTimes.length === 0) {
+      return [] as Array<{ timestampMs: number; count: number }>;
     }
-    return hours;
+
+    const first = parsedTimes[0];
+    const last = parsedTimes[parsedTimes.length - 1];
+    const spanMs = Math.max(last - first, 1);
+
+    let bucketMs = 5 * 60 * 1000; // 5 minutes
+    if (spanMs > 2 * 60 * 60 * 1000) bucketMs = 30 * 60 * 1000; // 30 minutes
+    if (spanMs > 24 * 60 * 60 * 1000) bucketMs = 2 * 60 * 60 * 1000; // 2 hours
+    if (spanMs > 7 * 24 * 60 * 60 * 1000) bucketMs = 24 * 60 * 60 * 1000; // 1 day
+
+    const bucketedCounts = new Map<number, number>();
+    for (const timeMs of parsedTimes) {
+      const bucketStart = Math.floor(timeMs / bucketMs) * bucketMs;
+      bucketedCounts.set(bucketStart, (bucketedCounts.get(bucketStart) || 0) + 1);
+    }
+
+    return [...bucketedCounts.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([timestampMs, count]) => ({ timestampMs, count }));
   }, [events]);
 
   const actionData = useMemo(() => {
@@ -104,10 +122,10 @@ export default function AnalysisCharts({ events, summary }: AnalysisChartsProps)
   return (
     <section className="analytics-grid">
       <article className="chart-card">
-        <h3>Event Volume by Hour</h3>
+        <h3>Event Volume Over Time</h3>
         <div className="chart-body">
           <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={hourlyData}>
+            <AreaChart data={timelineData}>
               <defs>
                 <linearGradient id="hourlyGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#00d4ff" stopOpacity={0.45} />
@@ -115,9 +133,35 @@ export default function AnalysisCharts({ events, summary }: AnalysisChartsProps)
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1b3442" />
-              <XAxis dataKey="hour" stroke="#9dc3d8" tick={{ fontSize: 11 }} />
+              <XAxis
+                type="number"
+                dataKey="timestampMs"
+                domain={["dataMin", "dataMax"]}
+                stroke="#9dc3d8"
+                tick={{ fontSize: 11 }}
+                tickFormatter={(value) =>
+                  new Date(Number(value)).toLocaleString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })
+                }
+              />
               <YAxis stroke="#9dc3d8" tick={{ fontSize: 11 }} />
-              <Tooltip />
+              <Tooltip
+                labelFormatter={(value) =>
+                  new Date(Number(value)).toLocaleString(undefined, {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })
+                }
+              />
               <Area
                 type="monotone"
                 dataKey="count"
