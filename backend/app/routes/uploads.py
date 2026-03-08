@@ -152,7 +152,7 @@ def upload_log_file():
     enrichment_by_index = enrich_high_priority_anomalies(anomaly_enrichment_inputs)
 
     anomaly_payloads_for_ai = []
-    for item in anomaly_response_items[:50]:
+    for item in anomaly_response_items:
         row = int(item["event_row"])
         event = parsed_events[row - 1] if 0 < row <= len(parsed_events) else {}
         username = event.get("username") or "unknown_user"
@@ -196,10 +196,11 @@ def upload_log_file():
     )
 
     events_preview = []
-    for event in parsed_events[:200]:
+    for line_number, event in enumerate(parsed_events, start=1):
         event_time = event.get("event_time")
         events_preview.append(
             {
+                "lineNumber": line_number,
                 "event_time": event_time.isoformat() if event_time else None,
                 "username": event.get("username"),
                 "source_ip": event.get("source_ip"),
@@ -211,7 +212,7 @@ def upload_log_file():
         )
 
     anomaly_response_payload = []
-    for anomaly_index, item in enumerate(anomaly_response_items[:20]):
+    for anomaly_index, item in enumerate(anomaly_response_items):
         severity_upper = (item["anomaly"].severity or "").upper()
         is_ai_eligible = severity_upper in {"HIGH", "CRITICAL"}
         payload = {

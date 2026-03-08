@@ -458,10 +458,22 @@ code {
   margin-top: 0.2rem;
 }
 
+.executive-brief h3 {
+  margin: 0 0 0.45rem;
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
 .executive-summary-text {
   margin: 0 0 0.9rem;
   color: var(--ink);
   line-height: 1.45;
+}
+
+.executive-brief-list {
+  margin-bottom: 0.85rem;
 }
 
 .risk-chip {
@@ -573,6 +585,21 @@ code {
 .chart-body {
   width: 100%;
   height: 260px;
+}
+
+.range-grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.range-meta {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  flex-wrap: wrap;
 }
 
 .table-controls {
@@ -708,6 +735,17 @@ code {
   gap: 0.35rem;
 }
 
+.anomaly-ai-legend {
+  margin: 0 0 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+
 .ai-enriched-badge {
   display: inline-block;
   border-radius: 999px;
@@ -794,6 +832,10 @@ code {
   }
 
   .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .range-grid {
     grid-template-columns: 1fr;
   }
 

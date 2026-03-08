@@ -44,7 +44,7 @@ export default function AnalysisCharts({ events, summary }: AnalysisChartsProps)
       if (!timestamp) continue;
       const parsed = new Date(timestamp);
       if (Number.isNaN(parsed.getTime())) continue;
-      const hour = parsed.getHours();
+      const hour = parsed.getUTCHours();
       if (hour >= 0 && hour <= 23) {
         hours[hour].count += 1;
       }
@@ -76,23 +76,25 @@ export default function AnalysisCharts({ events, summary }: AnalysisChartsProps)
   }, [events]);
 
   const categoryData = useMemo(() => {
-    if (summary.top_categories?.length) {
-      return summary.top_categories.map((item) => ({
-        category: item.value,
-        count: item.count
-      }));
-    }
-
     const counts = new Map<string, number>();
     for (const event of events) {
       const category = eventCategory(event);
       counts.set(category, (counts.get(category) || 0) + 1);
     }
 
-    return [...counts.entries()]
+    const fromEvents = [...counts.entries()]
       .map(([category, count]) => ({ category, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
+
+    if (fromEvents.length > 0) {
+      return fromEvents;
+    }
+
+    return (summary.top_categories || []).map((item) => ({
+      category: item.value,
+      count: item.count,
+    }));
   }, [events, summary.top_categories]);
 
   return (
