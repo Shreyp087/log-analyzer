@@ -16,6 +16,7 @@ export default function FindingsPanel({ result }: FindingsPanelProps) {
   const findings: string[] = [];
   const { summary } = result;
   const detectionNotes = result.detection_notes || [];
+  const detectionNotesSummary = result.detection_notes_summary;
 
   findings.push(`Upload status: ${result.status.replaceAll("_", " ")}`);
   findings.push(
@@ -47,6 +48,18 @@ export default function FindingsPanel({ result }: FindingsPanelProps) {
       </ul>
       <div className="detection-notes-section">
         <h3>Detection Notes</h3>
+        {detectionNotesSummary?.overview ? (
+          <p className="detection-notes-overview">{detectionNotesSummary.overview}</p>
+        ) : null}
+        {detectionNotesSummary?.entries?.length ? (
+          <ul className="detection-notes-why-list">
+            {detectionNotesSummary.entries.map((entry, index) => (
+              <li key={`detection-note-summary-${index}`}>
+                <strong>What:</strong> {entry.what} <strong>Why:</strong> {entry.why}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {detectionNotes.length > 0 ? (
           <ul className="detection-notes-list">
             {detectionNotes.map((note, index) => (

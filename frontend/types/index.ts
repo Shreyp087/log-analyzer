@@ -64,6 +64,17 @@ export interface AiExecutiveSummaryPayload {
   immediateActions: string[];
 }
 
+export interface DetectionNoteSummaryEntry {
+  what: string;
+  why: string;
+}
+
+export interface DetectionNotesSummaryPayload {
+  overview: string;
+  entries: DetectionNoteSummaryEntry[];
+  source?: "openai" | "fallback" | string;
+}
+
 export interface UploadAnomalyPayload {
   event_row?: number;
   event_id?: number;
@@ -112,6 +123,7 @@ export interface UploadResponse {
   parse_errors_count: number;
   parse_errors: UploadParseErrorPayload[];
   detection_notes?: string[];
+  detection_notes_summary?: DetectionNotesSummaryPayload;
   events_preview: UploadEventPreview[];
   summary: UploadSummaryPayload;
   ai_summary?: AiExecutiveSummaryPayload;
