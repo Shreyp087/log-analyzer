@@ -8,7 +8,10 @@ from sqlalchemy import select
 from app import db
 from app.models import Anomaly, Event, Summary, Upload, User
 from app.services.anomaly import detect_anomalies
-from app.services.ai_summary import generate_executive_summary
+from app.services.ai_summary import (
+    generate_detection_notes_summary,
+    generate_executive_summary,
+)
 from app.services.parser import parse_zscaler_lines
 from app.services.storage import save_upload_file
 from app.services.summary import generate_summary_metrics
@@ -164,6 +167,10 @@ def upload_log_file():
         anomaly_payloads_for_ai,
         blocked_events_for_ai,
     )
+    detection_notes_summary = generate_detection_notes_summary(
+        detection_notes,
+        anomaly_payloads_for_ai,
+    )
 
     events_preview = []
     for event in parsed_events[:200]:
@@ -192,6 +199,7 @@ def upload_log_file():
                 "parse_errors_count": len(parse_errors),
                 "parse_errors": parse_errors[:20],
                 "detection_notes": detection_notes[:10],
+                "detection_notes_summary": detection_notes_summary,
                 "events_preview": events_preview,
                 "summary": {
                     "total_events": summary.total_events,

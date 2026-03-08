@@ -28,6 +28,15 @@ SYSTEM_PROMPT = (
     "}"
 )
 
+DETECTION_NOTES_PROMPT = (
+    "You are a SOC analyst assistant. Convert detection engine notes into concise WHAT and WHY items. "
+    "Respond ONLY with valid JSON and this exact shape: "
+    "{"
+    '"overview":"1-2 sentence summary of detector behavior for this upload",'
+    '"entries":[{"what":"What happened","why":"Why it happened"}]'
+    "}"
+)
+
 
 def _normalize_risk_level(value: Any) -> str:
     normalized = str(value or "").upper()
@@ -249,6 +258,110 @@ def _sanitize_summary(payload: Any, fallback: Dict[str, Any]) -> Dict[str, Any]:
         "recommendations": recommendations[:2],
         "immediateActions": immediate_actions[:2],
     }
+
+
+def _fallback_detection_notes_summary(detection_notes: List[str]) -> Dict[str, Any]:
+    if not detection_notes:
+        return {
+            "overview": "No detection notes were generated for this upload.",
+            "entries": [],
+            "source": "fallback",
+        }
+
+    entries = []
+    for note in detection_notes[:5]:
+        note_clean = str(note).strip()
+        note_lower = note_clean.lower()
+        if note_lower.startswith("skipped"):
+            what = note_clean.split(":", 1)[0].strip()
+            why = note_clean.split(":", 1)[1].strip() if ":" in note_clean else "Detector guard conditions were not met."
+        elif "executed" in note_lower and "produced" in note_lower:
+            what = "AI anomaly detector executed for this upload."
+            why = note_clean
+        else:
+            what = note_clean
+            why = "Runtime detector note emitted by the analysis pipeline."
+
+        entries.append({"what": what, "why": why})
+
+    return {
+        "overview": f"Detection pipeline emitted {len(detection_notes)} note(s) for this upload.",
+        "entries": entries,
+        "source": "fallback",
+    }
+
+
+def _sanitize_detection_notes_summary(payload: Any, fallback: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        return fallback
+
+    overview = str(payload.get("overview") or fallback.get("overview") or "").strip()
+    raw_entries = payload.get("entries")
+    entries = []
+    if isinstance(raw_entries, list):
+        for item in raw_entries[:5]:
+            if not isinstance(item, dict):
+                continue
+            what = str(item.get("what") or "").strip()
+            why = str(item.get("why") or "").strip()
+            if what and why:
+                entries.append({"what": what, "why": why})
+
+    if not entries:
+        entries = fallback.get("entries", [])
+
+    return {
+        "overview": overview or fallback.get("overview", ""),
+        "entries": entries,
+        "source": "openai" if entries != fallback.get("entries", []) else fallback.get("source", "fallback"),
+    }
+
+
+def generate_detection_notes_summary(
+    detection_notes: List[str],
+    anomalies: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    fallback = _fallback_detection_notes_summary(detection_notes)
+    if not detection_notes:
+        return fallback
+
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key or OpenAI is None:
+        return fallback
+
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
+    anomaly_context = [
+        {
+            "type": anomaly.get("type"),
+            "severity": anomaly.get("severity"),
+            "confidence": anomaly.get("confidence"),
+            "row": anomaly.get("row"),
+        }
+        for anomaly in anomalies[:10]
+    ]
+    input_data = {
+        "detectionNotes": detection_notes[:10],
+        "anomalyContext": anomaly_context,
+    }
+
+    try:
+        openai = OpenAI(api_key=api_key)
+        completion = openai.chat.completions.create(
+            model=model,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": DETECTION_NOTES_PROMPT},
+                {"role": "user", "content": json.dumps(input_data)},
+            ],
+            max_tokens=350,
+            temperature=0.2,
+        )
+        content = completion.choices[0].message.content if completion.choices else None
+        result = json.loads(content) if content else {}
+        return _sanitize_detection_notes_summary(result, fallback)
+    except Exception as err:
+        logger.error("Detection notes summary AI failed; using fallback. Reason: %s", err)
+        return fallback
 
 
 def generate_executive_summary(

@@ -172,6 +172,7 @@ Final anomaly output is hybrid: rule findings remain primary, while AI contribut
 - Generation controls: `temperature: 0.2` for consistent factual output
 - Prompt input (structured): `{ totalEvents, blockedCount, blockRate, anomalies[], topSourceIPs[], topCategories[], threatsDetected }`
 - Returned JSON: `{ riskLevel, executiveSummary, keyFindings[], recommendations[], immediateActions[] }`
+- Detection-notes AI companion: summarizes `detection_notes[]` into explicit `what` + `why` entries (`detection_notes_summary`) for analyst traceability.
 - Failure handling: if API key is missing, rate-limited, or request fails, backend uses a deterministic fallback that returns the **same JSON shape**.
 - Estimated cost: `~$0.0002` per analysis (negligible for this scope)
 
