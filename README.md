@@ -108,21 +108,28 @@ Frontend URL: `http://localhost:3000`
 
 ### Auth
 
-- `POST /auth/register`  
-Body: `{ "email": "user@example.com", "password": "StrongPass123" }`
+- `POST /api/auth/register`  
+Body: `{ "name": "Alex Morgan", "username": "alex.morgan", "password": "StrongPass123", "role": "SOC Analyst" }`
 
-- `POST /auth/login`  
-Body: `{ "email": "user@example.com", "password": "StrongPass123" }`
+- `POST /api/auth/login`  
+Body: `{ "username": "alex.morgan", "password": "StrongPass123" }`
 
-- `GET /auth/me`  
+- `GET /api/auth/me`  
 Requires Bearer JWT token.
 
 ### Upload + Analysis
 
-- `POST /uploads`  
+- `POST /api/uploads`  
 Requires Bearer JWT token and multipart form data:
   - `file` (log file)
   - `source` (currently `zscaler`)
+
+- `POST /api/analysis`  
+Requires Bearer JWT token and JSON body:
+  - `upload_id` (integer from upload response)
+
+- `GET /api/analysis/:upload_id`  
+Requires Bearer JWT token. Returns persisted analysis payload for page reloads and direct linking.
 
 Returns:
 - upload metadata
@@ -133,20 +140,21 @@ Returns:
 
 ## Anomaly Explanation
 
-Anomaly detection is currently rule-based (`backend/app/services/anomaly.py`):
+Anomaly detection is currently hybrid (`backend/app/services/anomaly.py` + `backend/app/services/ai_anomaly.py`):
 
-1. `blocked_request`
-- Trigger: action is `BLOCK`
+1. `suspicious_destination`
+- High-priority trigger: destination/category indicates malware/C2 patterns  
+Keywords: `c2`, `cnc`, `botnet`, `darkweb`, `ransomware`
+- Precision trigger: suspicious keyword + `ALLOW` + corroborating signals
 
-2. `suspicious_destination`
-- Trigger: destination contains threat keywords  
-Keywords: `malicious`, `phish`, `command-and-control`, `cnc`, `tor`, `darkweb`
+2. `zero_byte_allowed_request`
+- Trigger: action is `ALLOW`, bytes is `0`, destination is suspicious, and category is not in safe categories
 
-3. `zero_byte_allowed_request`
-- Trigger: action is `ALLOW` or `PERMIT` and bytes transferred is `0`
-
-4. `excessive_data_transfer`
+3. `excessive_data_transfer`
 - Trigger: bytes transferred >= `50,000,000`
+
+4. `ai_behavioral_outlier`
+- Trigger: Isolation Forest flags non-baseline behavior on feature vectors derived from event metadata
 
 Each anomaly includes:
 - `anomaly_type`
@@ -207,13 +215,9 @@ Final anomaly output is hybrid: rule findings remain primary, while AI contribut
 
 ## Sample Credentials
 
-There is no seeded default user. Create one at `/register`.
-
-For demo purposes, you can use:
-- Email: `analyst.demo@company.com`
-- Password: `StrongPass123`
-
-If this user already exists in your local DB, use `/login` with the same credentials.
+Register any user at `/` (Create Account tab), or use demo credentials:
+- Username: `analyst`
+- Password: `analyst123`
 
 ## Sample Log Details
 

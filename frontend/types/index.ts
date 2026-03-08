@@ -129,6 +129,13 @@ export interface UploadEventPreview {
   bytes_transferred: number | null;
 }
 
+export interface UploadAcceptedResponse {
+  upload_id: number;
+  filename: string;
+  stored_file: string;
+  status: string;
+}
+
 export interface UploadResponse {
   upload_id: number;
   filename: string;

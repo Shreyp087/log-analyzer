@@ -182,8 +182,6 @@ export default function AuthEntryPoint() {
               />
             </label>
 
-            <p className="muted">Demo: analyst / analyst123</p>
-
             <button type="submit" className="btn-primary" disabled={submitting}>
               {submitting ? "Signing In..." : "Sign In"}
             </button>
