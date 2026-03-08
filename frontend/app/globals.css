@@ -417,6 +417,28 @@ code {
   font-size: 0.9rem;
 }
 
+.detection-notes-section {
+  margin-top: 0.95rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(20, 34, 47, 0.1);
+}
+
+.detection-notes-section h3 {
+  margin: 0 0 0.45rem;
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.detection-notes-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+}
+
 .executive-summary-panel {
   margin-top: 0.2rem;
 }
