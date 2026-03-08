@@ -154,6 +154,16 @@ Each anomaly includes:
 - `confidence` (0-1)
 - `severity` derived from confidence
 
+### AI-Assisted Anomaly Detection (Brief)
+
+In addition to deterministic rules, the backend now runs an unsupervised AI detector (`backend/app/services/ai_anomaly.py`) using **Isolation Forest**:
+- Model type: `IsolationForest` (outlier detection on unlabeled traffic)
+- Input features: bytes, action flags, category risk flags, suspicious destination signals, hour-of-day, and per-entity frequency ratios (source/user/destination)
+- Trigger policy: enabled only when dataset size is at least 30 events (to avoid unstable baselines)
+- Output: `ai_behavioral_outlier` findings with confidence, severity, explanation, and `detectionMethod=ai_isolation_forest`
+
+Final anomaly output is hybrid: rule findings remain primary, while AI contributes behavioral outliers as a secondary signal.
+
 ## AI & Detection Methodology
 
 ### OpenAI Executive Summary
@@ -192,7 +202,7 @@ Each anomaly includes:
 - Benign batch jobs can mimic burst/exfil patterns.
 - Sparse category labels reduce signature precision.
 
-> "LLMs are non-deterministic and cannot be audited — a SOC analyst must be able to explain exactly why an alert fired. Statistical methods produce reproducible results with mathematical justification. OpenAI gpt-4o-mini is used exclusively for natural language synthesis of already-structured findings, where its strength (fluent prose) outweighs its weakness (non-determinism)."
+> LLM output (`gpt-4o-mini`) is used for narrative synthesis only. Detection logic is produced by deterministic rules plus the auditable Isolation Forest outlier model.
 
 ## Sample Credentials
 

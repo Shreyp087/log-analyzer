@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+from app.services.ai_anomaly import detect_ai_anomalies
 from app.services.scoring import confidence_from_signals, severity_from_confidence
 
 SUSPICIOUS_DOMAIN_KEYWORDS = (
@@ -60,7 +61,7 @@ def _build_anomaly(
     }
 
 
-def detect_anomalies(events: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+def detect_anomalies(events: List[Dict[str, Any]]) -> Dict[str, Any]:
     anomalies: List[Dict[str, Any]] = []
     notes: List[str] = []
 
@@ -158,4 +159,16 @@ def detect_anomalies(events: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, A
                 )
             )
 
+    ai_detection_result = detect_ai_anomalies(events)
+    ai_anomalies = ai_detection_result.get("anomalies", [])
+    ai_notes = ai_detection_result.get("notes", [])
+
+    if ai_anomalies:
+        existing_keys = {(item.get("event_index"), item.get("type")) for item in anomalies}
+        for ai_anomaly in ai_anomalies:
+            anomaly_key = (ai_anomaly.get("event_index"), ai_anomaly.get("type"))
+            if anomaly_key not in existing_keys:
+                anomalies.append(ai_anomaly)
+
+    notes.extend(ai_notes)
     return {"anomalies": anomalies, "notes": notes}

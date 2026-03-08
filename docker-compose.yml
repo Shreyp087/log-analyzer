@@ -31,7 +31,7 @@ services:
       FLASK_DEBUG: 0
       APP_HOST: 0.0.0.0
       APP_PORT: 8000
-      DATABASE_URL: postgresql://log_user:log_password@postgres:5432/log_analyzer
+      DATABASE_URL: postgresql+psycopg://log_user:log_password@postgres:5432/log_analyzer
       CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
       UPLOAD_DIR: /app/uploads
     ports:
