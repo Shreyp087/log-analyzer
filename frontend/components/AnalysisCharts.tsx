@@ -55,12 +55,15 @@ export default function AnalysisCharts({ events, summary }: AnalysisChartsProps)
   const actionData = useMemo(() => {
     let allow = 0;
     let block = 0;
+    let permit = 0;
     let other = 0;
 
     for (const event of events) {
       const action = eventAction(event);
-      if (action === "ALLOW" || action === "PERMIT") {
+      if (action === "ALLOW") {
         allow += 1;
+      } else if (action === "PERMIT") {
+        permit += 1;
       } else if (action === "BLOCK") {
         block += 1;
       } else {
@@ -71,6 +74,7 @@ export default function AnalysisCharts({ events, summary }: AnalysisChartsProps)
     return [
       { name: "ALLOW", value: allow, color: "#00ff88" },
       { name: "BLOCK", value: block, color: "#ff4444" },
+      { name: "PERMIT", value: permit, color: "#00d4ff" },
       { name: "OTHER", value: other, color: "#6f86a2" }
     ];
   }, [events]);
@@ -127,7 +131,7 @@ export default function AnalysisCharts({ events, summary }: AnalysisChartsProps)
       </article>
 
       <article className="chart-card">
-        <h3>Allow vs Block</h3>
+        <h3>Action Distribution</h3>
         <div className="chart-body">
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
