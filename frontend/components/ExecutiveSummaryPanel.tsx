@@ -24,6 +24,13 @@ function riskClass(level: RiskLevel): string {
   return "risk-chip risk-low";
 }
 
+function summarySentences(value: string): string[] {
+  return value
+    .split(/(?<=[.!?])\s+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default function ExecutiveSummaryPanel({ result }: ExecutiveSummaryPanelProps) {
   const summary = result.ai_summary;
   const blockRate = asPercent(result.summary.blocked_events, result.summary.total_events);
@@ -43,6 +50,9 @@ export default function ExecutiveSummaryPanel({ result }: ExecutiveSummaryPanelP
   }
 
   const riskLevel = normalizeRiskLevel(summary.riskLevel);
+  const summaryLines = summarySentences(summary.executiveSummary);
+  const summaryLead = summaryLines[0] || summary.executiveSummary;
+  const summarySupporting = summaryLines.slice(1);
 
   return (
     <section className="analysis-section executive-summary-panel">
@@ -51,7 +61,17 @@ export default function ExecutiveSummaryPanel({ result }: ExecutiveSummaryPanelP
         <span className={riskClass(riskLevel)}>{riskLevel}</span>
       </div>
 
-      <p className="executive-summary-text">{summary.executiveSummary}</p>
+      <div className="executive-brief">
+        <h3>SOC Analyst Brief</h3>
+        <p className="executive-summary-text">{summaryLead}</p>
+        {summarySupporting.length > 0 ? (
+          <ul className="findings-list executive-brief-list">
+            {summarySupporting.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
 
       <div className="executive-stat-grid">
         <article className="executive-stat">
@@ -66,7 +86,7 @@ export default function ExecutiveSummaryPanel({ result }: ExecutiveSummaryPanelP
         </article>
         <article className="executive-stat">
           <h3>Anomalies</h3>
-          <p>{result.anomalies.length}</p>
+          <p>{result.summary.total_anomalies}</p>
         </article>
       </div>
 

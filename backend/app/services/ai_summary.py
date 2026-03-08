@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 SYSTEM_PROMPT = (
-    "You are a terse SOC analyst writing a 3-sentence executive briefing. "
-    "Be specific - name actual IPs, users, destinations, and anomaly types from the data. "
-    "Never use generic phrases like 'investigate anomalies' or 'review blocked entries'. "
-    "Every sentence must reference actual values from the input data. "
+    "You are a SOC analyst writing an operator-friendly executive briefing. "
+    "Use clear, human-readable language with short sentences. "
+    "Be specific: reference real users, IPs, destinations, and anomaly types from the input. "
+    "Avoid generic filler and avoid repeating dashboard card numbers verbatim. "
     "Respond ONLY with valid JSON, no markdown, no explanation. "
     "Return this JSON shape exactly: "
     "{"
@@ -49,6 +49,13 @@ def _normalize_list(value: Any, limit: int) -> List[str]:
     if not isinstance(value, list):
         return []
     return [str(item).strip() for item in value if str(item).strip()][:limit]
+
+
+def _trim_text(value: Any, max_length: int = 150) -> str:
+    text = str(value or "").strip()
+    if len(text) <= max_length:
+        return text
+    return f"{text[: max_length - 3].rstrip()}..."
 
 
 def _contains_keyword(value: str, keywords: List[str]) -> bool:
@@ -163,9 +170,10 @@ def fallback_summary(
     ]
 
     if primary:
+        primary_detail = _trim_text(primary.get("detail"), max_length=160)
         primary_text = (
             f"Primary signal: row {primary.get('row')} {primary.get('type')} on "
-            f"{primary.get('entity')} ({primary.get('confidence')}) - {primary.get('detail')}."
+            f"{primary.get('entity')} ({primary.get('confidence')}) - {primary_detail}."
         )
     else:
         primary_text = "No parser-level anomalies were produced for this upload."

@@ -53,6 +53,12 @@ export default function AnomaliesTable({
         <h2>Anomalies</h2>
         <span>{anomalies.length} findings</span>
       </div>
+      <p className="anomaly-ai-legend">
+        <span className="ai-enriched-badge">AI ENRICHED</span> includes MITRE mapping, attack pattern, and
+        containment guidance.
+        <span className="ai-eligible-badge">AI ELIGIBLE</span> marks HIGH/CRITICAL anomalies that qualify for AI
+        enrichment when the OpenAI call is available.
+      </p>
 
       {anomalies.length === 0 ? (
         <p className="muted">No anomalies detected for this upload.</p>
