@@ -83,6 +83,7 @@ export default function AnomaliesTable({
                 const isExpanded = Boolean(expandedRows[index]);
                 const hasEnrichment = Boolean(anomaly.aiEnrichment);
                 const aiStatus = anomaly.aiEnrichmentStatus || (hasEnrichment ? "enriched" : "not_applicable");
+                const aiStatusTitle = anomaly.aiEnrichmentReason || aiStatus.replace(/_/g, " ");
                 return (
                   <Fragment key={`${anomalyType(anomaly)}-${index}`}>
                     <tr
@@ -99,10 +100,26 @@ export default function AnomaliesTable({
                         <div className="anomaly-type-cell">
                           <span>{anomalyType(anomaly)}</span>
                           {aiStatus === "enriched" ? (
-                            <span className="ai-enriched-badge">AI ENRICHED</span>
+                            <span className="ai-enriched-badge" title={aiStatusTitle}>
+                              AI ENRICHED
+                            </span>
                           ) : null}
-                          {aiStatus === "eligible" ? (
-                            <span className="ai-eligible-badge">AI ELIGIBLE</span>
+                          {aiStatus === "eligible" ||
+                          aiStatus === "eligible_no_api_key" ||
+                          aiStatus === "eligible_openai_unavailable" ||
+                          aiStatus === "eligible_model_error" ||
+                          aiStatus === "eligible_invalid_response" ? (
+                            <span className="ai-eligible-badge" title={aiStatusTitle}>
+                              {aiStatus === "eligible_no_api_key"
+                                ? "AI NO KEY"
+                                : aiStatus === "eligible_openai_unavailable"
+                                  ? "AI SDK MISSING"
+                                  : aiStatus === "eligible_model_error"
+                                    ? "AI CALL FAILED"
+                                    : aiStatus === "eligible_invalid_response"
+                                      ? "AI RETRY NEEDED"
+                                      : "AI ELIGIBLE"}
+                            </span>
                           ) : null}
                         </div>
                       </td>

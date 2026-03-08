@@ -76,7 +76,16 @@ export interface DetectionNotesSummaryPayload {
 }
 
 export interface UploadAnomalyPayload {
-  aiEnrichmentStatus?: "enriched" | "eligible" | "not_applicable" | string;
+  aiEnrichmentStatus?:
+    | "enriched"
+    | "eligible"
+    | "not_applicable"
+    | "eligible_no_api_key"
+    | "eligible_openai_unavailable"
+    | "eligible_model_error"
+    | "eligible_invalid_response"
+    | string;
+  aiEnrichmentReason?: string;
   aiEnrichment?: {
     attackPattern: string;
     mitreId: string;
