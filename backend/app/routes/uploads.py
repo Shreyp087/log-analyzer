@@ -8,6 +8,7 @@ from sqlalchemy import select
 from app import db
 from app.models import Anomaly, Event, Summary, Upload, User
 from app.services.anomaly import detect_anomalies
+from app.services.ai_enrichment import enrich_high_priority_anomalies
 from app.services.ai_summary import (
     generate_detection_notes_summary,
     generate_executive_summary,
@@ -128,6 +129,28 @@ def upload_log_file():
         db.session.rollback()
         return jsonify({"error": "failed to process upload", "details": str(exc)}), 500
 
+    anomaly_enrichment_inputs = []
+    for anomaly_index, item in enumerate(anomaly_response_items):
+        row = int(item["event_row"])
+        event = parsed_events[row - 1] if 0 < row <= len(parsed_events) else {}
+        event_time = event.get("event_time")
+        event_time_iso = event_time.isoformat() if event_time else None
+        anomaly_enrichment_inputs.append(
+            {
+                "anomaly_index": anomaly_index,
+                "severity": (item["anomaly"].severity or "").upper(),
+                "anomalyType": item["anomaly"].anomaly_type,
+                "entity": f"{event.get('username') or 'unknown_user'} / {event.get('source_ip') or 'unknown_ip'}",
+                "destination": event.get("destination") or "unknown_destination",
+                "bytesTransferred": int(event.get("bytes_transferred") or 0),
+                "action": event.get("action") or "UNKNOWN",
+                "category": event.get("category") or "Unknown",
+                "timestamp": event_time_iso,
+            }
+        )
+
+    enrichment_by_index = enrich_high_priority_anomalies(anomaly_enrichment_inputs)
+
     anomaly_payloads_for_ai = []
     for item in anomaly_response_items[:50]:
         row = int(item["event_row"])
@@ -187,6 +210,25 @@ def upload_log_file():
             }
         )
 
+    anomaly_response_payload = []
+    for anomaly_index, item in enumerate(anomaly_response_items[:20]):
+        payload = {
+            "event_row": item["event_row"],
+            "affectedLines": item["affected_lines"],
+            "detectionMethod": item["detection_method"],
+            "type": item["anomaly"].anomaly_type,
+            "event_id": item["anomaly"].event_id,
+            "anomaly_type": item["anomaly"].anomaly_type,
+            "severity": item["anomaly"].severity,
+            "confidence": item["anomaly"].score,
+            "explanation": item["anomaly"].description,
+            "description": item["anomaly"].description,
+        }
+        ai_enrichment = enrichment_by_index.get(anomaly_index)
+        if ai_enrichment:
+            payload["aiEnrichment"] = ai_enrichment
+        anomaly_response_payload.append(payload)
+
     return (
         jsonify(
             {
@@ -212,21 +254,7 @@ def upload_log_file():
                     "top_source_ips": summary.top_source_ips,
                 },
                 "ai_summary": executive_summary,
-                "anomalies": [
-                    {
-                        "event_row": item["event_row"],
-                        "affectedLines": item["affected_lines"],
-                        "detectionMethod": item["detection_method"],
-                        "type": item["anomaly"].anomaly_type,
-                        "event_id": item["anomaly"].event_id,
-                        "anomaly_type": item["anomaly"].anomaly_type,
-                        "severity": item["anomaly"].severity,
-                        "confidence": item["anomaly"].score,
-                        "explanation": item["anomaly"].description,
-                        "description": item["anomaly"].description,
-                    }
-                    for item in anomaly_response_items[:20]
-                ],
+                "anomalies": anomaly_response_payload,
             }
         ),
         201,
