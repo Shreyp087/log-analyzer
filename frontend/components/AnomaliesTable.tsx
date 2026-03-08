@@ -76,6 +76,7 @@ export default function AnomaliesTable({
                 const description = anomalyText(anomaly);
                 const isExpanded = Boolean(expandedRows[index]);
                 const hasEnrichment = Boolean(anomaly.aiEnrichment);
+                const aiStatus = anomaly.aiEnrichmentStatus || (hasEnrichment ? "enriched" : "not_applicable");
                 return (
                   <Fragment key={`${anomalyType(anomaly)}-${index}`}>
                     <tr
@@ -91,7 +92,12 @@ export default function AnomaliesTable({
                       <td>
                         <div className="anomaly-type-cell">
                           <span>{anomalyType(anomaly)}</span>
-                          {hasEnrichment ? <span className="ai-enriched-badge">AI ENRICHED</span> : null}
+                          {aiStatus === "enriched" ? (
+                            <span className="ai-enriched-badge">AI ENRICHED</span>
+                          ) : null}
+                          {aiStatus === "eligible" ? (
+                            <span className="ai-eligible-badge">AI ELIGIBLE</span>
+                          ) : null}
                         </div>
                       </td>
                       <td>
