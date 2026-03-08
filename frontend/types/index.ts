@@ -76,6 +76,12 @@ export interface DetectionNotesSummaryPayload {
 }
 
 export interface UploadAnomalyPayload {
+  aiEnrichment?: {
+    attackPattern: string;
+    mitreId: string;
+    mitreName: string;
+    containmentStep: string;
+  };
   event_row?: number;
   event_id?: number;
   anomaly_type?: string;

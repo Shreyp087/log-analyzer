@@ -701,6 +701,55 @@ code {
   word-break: break-word;
 }
 
+.anomaly-type-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ai-enriched-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.13rem 0.45rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(0, 212, 255, 0.14);
+  color: #0f6178;
+  border: 1px solid rgba(0, 212, 255, 0.35);
+}
+
+.anomaly-expand-btn {
+  margin-top: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.76rem;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-mono), "Consolas", monospace;
+}
+
+.anomaly-expand-btn:hover {
+  color: var(--ink);
+}
+
+.anomaly-enrichment-row td {
+  background: rgba(20, 34, 47, 0.04);
+  border-bottom-color: rgba(20, 34, 47, 0.09);
+}
+
+.anomaly-enrichment-block p {
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
+}
+
+.anomaly-enrichment-block p:last-child {
+  margin-bottom: 0;
+}
+
 .sev-critical {
   background: rgba(255, 68, 68, 0.2);
   color: #8f1515;

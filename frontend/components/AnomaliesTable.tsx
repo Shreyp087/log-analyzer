@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment, useState } from "react";
 import type { UploadAnomalyPayload } from "@/types";
 
 type AnomaliesTableProps = {
@@ -40,6 +41,11 @@ export default function AnomaliesTable({
   onSelectLines
 }: AnomaliesTableProps) {
   const activeSet = new Set(activeLines);
+  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+
+  const toggleExpanded = (index: number) => {
+    setExpandedRows((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
 
   return (
     <section className="analysis-section">
@@ -68,24 +74,67 @@ export default function AnomaliesTable({
                 const linesLabel = lines.length > 0 ? lines.join(", ") : "-";
                 const isLinked = lines.some((line) => activeSet.has(line));
                 const description = anomalyText(anomaly);
+                const isExpanded = Boolean(expandedRows[index]);
+                const hasEnrichment = Boolean(anomaly.aiEnrichment);
                 return (
-                  <tr
-                    key={`${anomalyType(anomaly)}-${index}`}
-                    className={isLinked ? "anomaly-row-active" : ""}
-                    onClick={() => onSelectLines?.(lines)}
-                  >
-                    <td>{linesLabel}</td>
-                    <td>{anomalyType(anomaly)}</td>
-                    <td>
-                      <span className={`sev-chip ${severityClass(anomaly.severity)}`}>
-                        {anomaly.severity}
-                      </span>
-                    </td>
-                    <td>{Math.round(anomaly.confidence * 100)}%</td>
-                    <td className="anomaly-description-cell">
-                      <span className="anomaly-description-text">{description}</span>
-                    </td>
-                  </tr>
+                  <Fragment key={`${anomalyType(anomaly)}-${index}`}>
+                    <tr
+                      className={isLinked ? "anomaly-row-active" : ""}
+                      onClick={() => {
+                        onSelectLines?.(lines);
+                        if (hasEnrichment) {
+                          toggleExpanded(index);
+                        }
+                      }}
+                    >
+                      <td>{linesLabel}</td>
+                      <td>
+                        <div className="anomaly-type-cell">
+                          <span>{anomalyType(anomaly)}</span>
+                          {hasEnrichment ? <span className="ai-enriched-badge">AI ENRICHED</span> : null}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`sev-chip ${severityClass(anomaly.severity)}`}>
+                          {anomaly.severity}
+                        </span>
+                      </td>
+                      <td>{Math.round(anomaly.confidence * 100)}%</td>
+                      <td className="anomaly-description-cell">
+                        <span className="anomaly-description-text">{description}</span>
+                        {hasEnrichment ? (
+                          <button
+                            type="button"
+                            className="anomaly-expand-btn"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              toggleExpanded(index);
+                            }}
+                          >
+                            {isExpanded ? "▲ less" : "▼ more"}
+                          </button>
+                        ) : null}
+                      </td>
+                    </tr>
+                    {hasEnrichment && isExpanded ? (
+                      <tr className="anomaly-enrichment-row">
+                        <td colSpan={5}>
+                          <div className="anomaly-enrichment-block">
+                            <p>
+                              <strong>MITRE:</strong> {anomaly.aiEnrichment?.mitreId} -{" "}
+                              {anomaly.aiEnrichment?.mitreName}
+                            </p>
+                            <p>
+                              <strong>Attack Pattern:</strong> {anomaly.aiEnrichment?.attackPattern}
+                            </p>
+                            <p>
+                              <strong>Containment:</strong> {anomaly.aiEnrichment?.containmentStep}
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
                 );
               })}
             </tbody>
