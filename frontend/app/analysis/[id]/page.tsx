@@ -10,6 +10,7 @@ import ExecutiveSummaryPanel from "@/components/ExecutiveSummaryPanel";
 import FindingsPanel from "@/components/FindingsPanel";
 import SummaryCards from "@/components/SummaryCards";
 import TimelineTable from "@/components/TimelineTable";
+import { fetchAnalysis } from "@/lib/api";
 import { getAuthToken } from "@/lib/auth";
 import type { UploadAnomalyPayload, UploadEventPreview, UploadResponse } from "@/types";
 
@@ -88,16 +89,34 @@ export default function AnalysisPage() {
     }
 
     const cachedResult = readStoredAnalysis(uploadId);
-    if (!cachedResult) {
-      setError(
-        "No stored analysis found for this upload ID in the current browser session. Re-upload the file to regenerate results."
-      );
+    if (cachedResult) {
+      setResult(cachedResult);
       setLoading(false);
       return;
     }
 
-    setResult(cachedResult);
-    setLoading(false);
+    const numericUploadId = Number(uploadId);
+    if (!Number.isFinite(numericUploadId) || numericUploadId <= 0) {
+      setError("Invalid analysis ID.");
+      setLoading(false);
+      return;
+    }
+
+    fetchAnalysis(numericUploadId)
+      .then((payload) => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem(storageKey(uploadId), JSON.stringify(payload));
+        }
+        setResult(payload);
+      })
+      .catch((loadError) => {
+        if (loadError instanceof Error) {
+          setError(loadError.message);
+        } else {
+          setError("Failed to load analysis from backend.");
+        }
+      })
+      .finally(() => setLoading(false));
   }, [router, uploadId]);
 
   useEffect(() => {

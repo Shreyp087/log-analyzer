@@ -35,6 +35,14 @@ function formatTime(value: string | null): string {
   return parsed.toLocaleString();
 }
 
+function formatBytes(value: number | null): string {
+  if (value === null || Number.isNaN(value)) return "-";
+  if (value >= 1024 * 1024 * 1024) return `${(value / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+  if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+  if (value >= 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${value} B`;
+}
+
 function hasThreat(threat: string | null | undefined): boolean {
   if (!threat) return false;
   return threat.trim().toLowerCase() !== "none";
@@ -197,7 +205,7 @@ export default function TimelineTable({
                     <td className="truncate" title={entry.raw || undefined}>
                       {entry.url || "-"}
                     </td>
-                    <td>{entry.bytes ?? "-"}</td>
+                    <td>{formatBytes(entry.bytes)}</td>
                     <td>
                       <div className="row-badges">
                         {hasThreat(entry.threat) ? (

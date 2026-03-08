@@ -6,6 +6,7 @@ import type {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
+  UploadAcceptedResponse,
   UploadResponse
 } from "@/types";
 
@@ -100,13 +101,26 @@ export function fetchCurrentUser(token?: string): Promise<AuthenticatedUser> {
   return apiRequest<AuthenticatedUser>("/api/auth/me", { method: "GET", token });
 }
 
-export function uploadLogFile(file: File, source = "zscaler"): Promise<UploadResponse> {
+export function uploadLogFile(file: File, source = "zscaler"): Promise<UploadAcceptedResponse> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("source", source);
 
-  return apiRequest<UploadResponse>("/uploads", {
+  return apiRequest<UploadAcceptedResponse>("/api/uploads", {
     method: "POST",
     body: formData
+  });
+}
+
+export function analyzeUpload(uploadId: number): Promise<UploadResponse> {
+  return apiRequest<UploadResponse>("/api/analysis", {
+    method: "POST",
+    body: { upload_id: uploadId },
+  });
+}
+
+export function fetchAnalysis(uploadId: number): Promise<UploadResponse> {
+  return apiRequest<UploadResponse>(`/api/analysis/${uploadId}`, {
+    method: "GET",
   });
 }

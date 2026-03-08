@@ -3,34 +3,76 @@
 import Link from "next/link";
 import { DragEvent, useMemo, useState } from "react";
 
-import { ApiRequestError, uploadLogFile } from "@/lib/api";
+import { analyzeUpload, ApiRequestError, uploadLogFile } from "@/lib/api";
 import type { UploadResponse } from "@/types";
 
 type UploadDropzoneProps = {
   onUploaded?: (payload: UploadResponse) => void;
 };
 
+const ALLOWED_EXTENSIONS = [".log", ".txt", ".csv"] as const;
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
+function formatBytes(value: number): string {
+  if (value >= 1024 * 1024) {
+    return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+  }
+  if (value >= 1024) {
+    return `${Math.ceil(value / 1024)} KB`;
+  }
+  return `${value} B`;
+}
+
+function hasAllowedExtension(fileName: string): boolean {
+  const normalized = fileName.toLowerCase();
+  return ALLOWED_EXTENSIONS.some((extension) => normalized.endsWith(extension));
+}
+
+function validateFile(candidate: File): string | null {
+  if (!hasAllowedExtension(candidate.name)) {
+    return "Invalid file type. Allowed extensions: .log, .txt, .csv";
+  }
+  if (candidate.size > MAX_UPLOAD_BYTES) {
+    return `File is too large. Maximum size is ${formatBytes(MAX_UPLOAD_BYTES)}.`;
+  }
+  return null;
+}
+
+type UploadPhase = "idle" | "uploading" | "analyzing";
+
 export default function UploadDropzone({ onUploaded }: UploadDropzoneProps) {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [phase, setPhase] = useState<UploadPhase>("idle");
   const [error, setError] = useState<string>("");
   const [result, setResult] = useState<UploadResponse | null>(null);
 
   const selectedFileLabel = useMemo(() => {
     if (!file) return "No file selected";
-    return `${file.name} (${Math.ceil(file.size / 1024)} KB)`;
+    return `${file.name} (${formatBytes(file.size)})`;
   }, [file]);
+
+  const uploading = phase !== "idle";
+
+  const setValidatedFile = (candidate: File | null) => {
+    if (!candidate) return;
+    const validationError = validateFile(candidate);
+    if (validationError) {
+      setFile(null);
+      setResult(null);
+      setError(validationError);
+      return;
+    }
+    setFile(candidate);
+    setResult(null);
+    setError("");
+  };
 
   const onDrop = (event: DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setDragActive(false);
-
-    const candidate = event.dataTransfer.files?.[0];
-    if (!candidate) return;
-    setFile(candidate);
-    setError("");
+    setValidatedFile(event.dataTransfer.files?.[0] || null);
   };
 
   const onDragOver = (event: DragEvent<HTMLLabelElement>) => {
@@ -47,15 +89,18 @@ export default function UploadDropzone({ onUploaded }: UploadDropzoneProps) {
 
   const submitUpload = async () => {
     if (!file) {
-      setError("Please select a log file before uploading.");
+      setError("Please select a valid log file before uploading.");
       return;
     }
 
-    setUploading(true);
+    setPhase("uploading");
     setError("");
 
     try {
-      const payload = await uploadLogFile(file, "zscaler");
+      const upload = await uploadLogFile(file, "zscaler");
+      setPhase("analyzing");
+
+      const payload = await analyzeUpload(upload.upload_id);
       if (typeof window !== "undefined") {
         localStorage.setItem(`analysis_result_${payload.upload_id}`, JSON.stringify(payload));
       }
@@ -68,7 +113,7 @@ export default function UploadDropzone({ onUploaded }: UploadDropzoneProps) {
         setError("Upload failed. Please retry.");
       }
     } finally {
-      setUploading(false);
+      setPhase("idle");
     }
   };
 
@@ -83,22 +128,24 @@ export default function UploadDropzone({ onUploaded }: UploadDropzoneProps) {
         <input
           type="file"
           accept=".log,.txt,.csv"
-          onChange={(event) => {
-            const candidate = event.target.files?.[0];
-            if (candidate) {
-              setFile(candidate);
-              setError("");
-            }
-          }}
+          onChange={(event) => setValidatedFile(event.target.files?.[0] || null)}
         />
         <strong>Drop Zscaler log file here</strong>
         <span>or click to browse</span>
       </label>
 
       <p className="muted">{selectedFileLabel}</p>
+      <p className="muted">
+        Accepted files: <code>.log</code>, <code>.txt</code>, <code>.csv</code>. Max size:{" "}
+        {formatBytes(MAX_UPLOAD_BYTES)}.
+      </p>
 
       <button type="button" className="btn-primary" onClick={submitUpload} disabled={uploading}>
-        {uploading ? "Uploading..." : "Upload And Analyze"}
+        {phase === "uploading"
+          ? "Uploading..."
+          : phase === "analyzing"
+            ? "Analyzing..."
+            : "Upload And Analyze"}
       </button>
 
       {error ? <p className="form-feedback error">{error}</p> : null}
