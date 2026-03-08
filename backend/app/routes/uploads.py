@@ -149,7 +149,9 @@ def upload_log_file():
             }
         )
 
-    enrichment_by_index = enrich_high_priority_anomalies(anomaly_enrichment_inputs)
+    enrichment_result = enrich_high_priority_anomalies(anomaly_enrichment_inputs)
+    enrichment_by_index = enrichment_result.get("enriched_by_index", {})
+    enrichment_status_by_index = enrichment_result.get("status_by_index", {})
 
     anomaly_payloads_for_ai = []
     for item in anomaly_response_items:
@@ -228,10 +230,15 @@ def upload_log_file():
             "description": item["anomaly"].description,
             "aiEnrichmentStatus": "eligible" if is_ai_eligible else "not_applicable",
         }
+        status_value = enrichment_status_by_index.get(anomaly_index)
+        if status_value:
+            payload["aiEnrichmentStatus"] = status_value
+            payload["aiEnrichmentReason"] = status_value.replace("_", " ")
         ai_enrichment = enrichment_by_index.get(anomaly_index)
         if ai_enrichment:
             payload["aiEnrichment"] = ai_enrichment
             payload["aiEnrichmentStatus"] = "enriched"
+            payload["aiEnrichmentReason"] = "openai enrichment successful"
         anomaly_response_payload.append(payload)
 
     return (
